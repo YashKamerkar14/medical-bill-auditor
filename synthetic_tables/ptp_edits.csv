@@ -1,0 +1,12 @@
+column1,column2,effective_date,deletion_date,modifier_indicator,rationale
+Z1040,Z1041,2026-01-01,,0,"More extensive procedure (manual I.L): the limited procedure is part of the comprehensive one"
+Z1042,Z1043,2026-01-01,,0,"Mutually exclusive procedures (manual I.P): open and closed approach to the same repair"
+Z1030,Z1031,2026-01-01,,0,"Laboratory panel (manual I.N): component test included in the panel"
+Z1030,Z1032,2026-01-01,,0,"Laboratory panel (manual I.N): component test included in the panel"
+Z1010,Z1020,2026-01-01,,1,"Standards of medical/surgical practice (manual I.B): injection is part of the procedure unless at a separate site"
+Z1001,Z1021,2026-01-01,,1,"Medical/surgical package (manual I.C): blood draw bundled into the visit unless a separate encounter"
+Z1002,Z1022,2026-11-01,,1,"Edit added mid-quarter: applies to dates of service from 2026-11-01"
+Z1060,Z1061,2026-01-01,2026-11-15,1,"Edit deleted mid-quarter: applies to dates of service before 2026-11-15 only"
+Z1070,Z1071,2026-01-01,2026-01-01,9,"Deleted on its effective date (indicator 9, manual I.E): never applies"
+Z1044,Z1045,2026-01-01,2026-10-15,0,"Indicator changed mid-quarter: modifiers not allowed before 2026-10-15"
+Z1044,Z1045,2026-10-15,,1,"Indicator changed mid-quarter: modifiers allowed from 2026-10-15"

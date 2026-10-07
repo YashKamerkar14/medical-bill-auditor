@@ -1,0 +1,13 @@
+code,mue_value,mai,rationale
+Z1001,1,2,"One visit of this type per patient per day (policy)"
+Z1002,1,2,"One new-patient visit per patient per day (policy)"
+Z1010,2,1,"Claim line edit: separate lines allowed with anatomic or distinct-site modifiers"
+Z1020,4,3,"Clinical benchmark: more than four injections a day is highly unlikely"
+Z1021,1,3,"Clinical benchmark: one blood draw per day"
+Z1022,2,3,"Clinical benchmark: two vaccine administrations per day"
+Z1030,1,2,"One panel per patient per day (policy)"
+Z1040,1,2,"Anatomic: one comprehensive procedure per knee per day (policy)"
+Z1041,1,2,"Anatomic: one limited procedure per knee per day (policy)"
+Z1050,3,3,"Clinical benchmark: up to three imaging studies a day"
+Z1060,4,3,"Clinical benchmark: up to one hour of therapy (4 x 15 minutes) a day"
+Z1070,50,3,"Clinical benchmark: drug units based on maximum daily dose"

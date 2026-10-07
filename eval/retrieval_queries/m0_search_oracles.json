@@ -1,0 +1,21 @@
+{
+  "_instructions": [
+    "Milestone 0 search oracles: 10 questions a bill auditor would ask, each labelled with the manual section(s) that answer it.",
+    "Expected sections were chosen from the manual's contents before any search output was looked at.",
+    "Section ids are chapter + letter, e.g. 'I.E' (Modifiers and Modifier Indicators) or 'XI.U' (E&M services).",
+    "Wordings are mixed: the manual's own terms, plain patient language, and questions naming a code or modifier."
+  ],
+  "written_on": "2026-10-06",
+  "queries": [
+    {"id": "s01", "style": "manual terms", "query": "When can modifier 59 or an X modifier be used to bypass a PTP edit?", "expected_sections": ["I.E"]},
+    {"id": "s02", "style": "plain language", "query": "My doctor charged for an office visit and a small procedure on the same day. Is that allowed?", "expected_sections": ["I.D", "I.E", "XI.U"]},
+    {"id": "s03", "style": "manual terms", "query": "What does an MUE adjudication indicator of 2 mean?", "expected_sections": ["I.V"]},
+    {"id": "s04", "style": "plain language", "query": "Can they bill a lab panel and also each test inside the panel separately?", "expected_sections": ["I.N"]},
+    {"id": "s05", "style": "codes", "query": "Hydration and IV infusion codes 96360-96379 reported on the same day, initial versus subsequent", "expected_sections": ["XI.B"]},
+    {"id": "s06", "style": "plain language", "query": "I was billed for two procedures that could not both have been done in the same session", "expected_sections": ["I.P"]},
+    {"id": "s07", "style": "manual terms", "query": "Add-on code reported without its primary procedure code", "expected_sections": ["I.R", "I.W"]},
+    {"id": "s08", "style": "plain language", "query": "The bill shows more units of a service than anyone could get in one day", "expected_sections": ["I.V", "XI.V"]},
+    {"id": "s09", "style": "codes", "query": "Physical therapy evaluation billed with therapeutic exercise 97110 on the same date", "expected_sections": ["XI.P"]},
+    {"id": "s10", "style": "manual terms", "query": "Chemotherapy administration reported with a separate E&M service", "expected_sections": ["XI.N"]}
+  ]
+}

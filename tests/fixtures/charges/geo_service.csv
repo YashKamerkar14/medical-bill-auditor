@@ -1,0 +1,6 @@
+﻿Rndrng_Prvdr_Geo_Lvl,Rndrng_Prvdr_Geo_Cd,Rndrng_Prvdr_Geo_Desc,HCPCS_Cd,HCPCS_Desc,HCPCS_Drug_Ind,Place_Of_Srvc,Tot_Rndrng_Prvdrs,Tot_Benes,Tot_Srvcs,Tot_Bene_Day_Srvcs,Avg_Sbmtd_Chrg,Avg_Mdcr_Alowd_Amt,Avg_Mdcr_Pymt_Amt,Avg_Mdcr_Stdzd_Amt
+National,,National,ZZ001,"Fake office visit, established patient",N,O,1000,50000,90000,90000,250.125,100.0049,80.995,99.5
+National,,National,ZZ001,"Fake office visit, established patient",N,F,800,30000,40000,40000,300.5,90.25,72.2,88
+State,06,California,ZZ001,"Fake office visit, established patient",N,O,200,9000,15000,15000,310.4999,120.5,96.4,99
+State,,,ZZ001,"Fake office visit, established patient",N,O,11,11,11,11,1,1,1,1
+National,,National,ZZ070,"Fake injectable drug",Y,O,40,600,466.9,466.9,12.3456,5.4321,4.3,5

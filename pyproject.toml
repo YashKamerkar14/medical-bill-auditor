@@ -1,0 +1,48 @@
+[project]
+name = "bill-auditor"
+version = "0.0.1"
+description = "Audits professional medical bills against EOBs and public Medicare data, with verified evidence for every flag."
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+# Exact pins on purpose: LangGraph and MCP change often, and evaluation results
+# are only comparable if the code underneath them does not move.
+# Why each version was chosen: docs/decisions/0001-library-versions.md
+dependencies = [
+    "pydantic==2.13.5",
+    "python-dotenv==1.2.4",
+    "pdfplumber==0.11.10",
+    "chromadb==1.5.9",
+    "fastembed==0.8.1",
+    "langgraph==1.2.14",
+    "langchain-core==1.6.7",
+    "langchain[mcp]==1.4.3",
+    "mcp==2.3.0",
+    "google-genai==2.28.0",
+    "faker==40.41.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+]
+
+[build-system]
+requires = ["hatchling==1.32.4"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bill_auditor"]
+
+[tool.uv]
+# Use a uv-managed Python rather than the Microsoft Store one, which redirects
+# AppData writes and causes odd virtual-environment bugs on Windows.
+python-preference = "only-managed"
+# Hard links from uv's cache fail on this machine (Windows error 396, "cloud
+# operation"); copying is slower but always works.
+link-mode = "copy"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "acceptance: runs against the real CMS tables under DATA_DIR; skipped when they are not loaded",
+]

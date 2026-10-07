@@ -1,0 +1,10 @@
+{
+    // The virtual environment lives outside OneDrive (thousands of small files
+    // would otherwise be synced). uv reads UV_PROJECT_ENVIRONMENT to find it.
+    "terminal.integrated.env.windows": {
+        "UV_PROJECT_ENVIRONMENT": "C:\\dev\\bill-auditor-data\\.venv"
+    },
+    "python.defaultInterpreterPath": "C:\\dev\\bill-auditor-data\\.venv\\Scripts\\python.exe",
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": ["tests"]
+}

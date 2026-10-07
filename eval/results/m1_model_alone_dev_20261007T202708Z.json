@@ -1,0 +1,774 @@
+{
+ "system": "model_alone",
+ "model": "gemini-3.5-flash-lite",
+ "prompt_version": "6e6b22cdf35c",
+ "split": "dev",
+ "cases_answered": 240,
+ "cases_in_split": 240,
+ "scored_at": "2026-10-07T20:27:08+00:00",
+ "table_releases": [
+  {
+   "dataset": "charges",
+   "label": "Medicare Physician & Other Practitioners by Geography and Service, data year 2024",
+   "synthetic": 0
+  },
+  {
+   "dataset": "manual",
+   "label": "NCCI Policy Manual 2026 (rev. 2026-01-01)",
+   "synthetic": 0
+  },
+  {
+   "dataset": "mue",
+   "label": "SYNTHETIC unit limits v1 (not Medicare data)",
+   "synthetic": 1
+  },
+  {
+   "dataset": "pfs",
+   "label": "PFS 2026 nonQP A-D",
+   "synthetic": 0
+  },
+  {
+   "dataset": "ptp",
+   "label": "SYNTHETIC code-pair edits v1 (not Medicare data)",
+   "synthetic": 1
+  }
+ ],
+ "case_file_sha256": {
+  "cases.jsonl": "07e04aface8bab945d41183c61c8746d63a9bdfa204a9549bdb0bc1a0b251fff",
+  "hard_cases.jsonl": "747741e3de747937daa1c7f48684dd74d8fe6c538da968d6b87a6a2ead84107d"
+ },
+ "summaries": {
+  "all": {
+   "cases": 240,
+   "valid_outputs": {
+    "successes": 240,
+    "n": 240,
+    "rate": 1.0,
+    "low": 0.9842455102000642,
+    "high": 1.0
+   },
+   "detection": {
+    "all_checks": {
+     "recall": {
+      "successes": 76,
+      "n": 128,
+      "rate": 0.59375,
+      "low": 0.5071382471838718,
+      "high": 0.674898378585233
+     },
+     "precision": {
+      "successes": 76,
+      "n": 242,
+      "rate": 0.3140495867768595,
+      "low": 0.2588631079388827,
+      "high": 0.3750475076770262
+     },
+     "amount_accuracy": {
+      "successes": 67,
+      "n": 76,
+      "rate": 0.881578947368421,
+      "low": 0.7900058191184284,
+      "high": 0.9364325288104708
+     }
+    },
+    "real_rule_checks": {
+     "recall": {
+      "successes": 70,
+      "n": 75,
+      "rate": 0.9333333333333333,
+      "low": 0.8532474983062438,
+      "high": 0.9711903619096828
+     },
+     "precision": {
+      "successes": 70,
+      "n": 236,
+      "rate": 0.2966101694915254,
+      "low": 0.24196859902139362,
+      "high": 0.35776722662353205
+     },
+     "amount_accuracy": {
+      "successes": 61,
+      "n": 70,
+      "rate": 0.8714285714285714,
+      "low": 0.7733503128681549,
+      "high": 0.9308597800875773
+     }
+    },
+    "synthetic_rule_checks": {
+     "recall": {
+      "successes": 6,
+      "n": 53,
+      "rate": 0.11320754716981132,
+      "low": 0.052929589110686695,
+      "high": 0.22576770301339144
+     },
+     "precision": {
+      "successes": 6,
+      "n": 6,
+      "rate": 1.0,
+      "low": 0.6096569663469354,
+      "high": 0.9999999999999999
+     },
+     "amount_accuracy": {
+      "successes": 6,
+      "n": 6,
+      "rate": 1.0,
+      "low": 0.6096569663469354,
+      "high": 0.9999999999999999
+     }
+    },
+    "per_check": {
+     "provider_liability": {
+      "recall": {
+       "successes": 32,
+       "n": 32,
+       "rate": 1.0,
+       "low": 0.8928172849426366,
+       "high": 1.0
+      },
+      "precision": {
+       "successes": 32,
+       "n": 45,
+       "rate": 0.7111111111111111,
+       "low": 0.5663118252773978,
+       "high": 0.8227008196809984
+      },
+      "amount_accuracy": {
+       "successes": 32,
+       "n": 32,
+       "rate": 1.0,
+       "low": 0.8928172849426366,
+       "high": 1.0
+      }
+     },
+     "duplicate": {
+      "recall": {
+       "successes": 19,
+       "n": 21,
+       "rate": 0.9047619047619048,
+       "low": 0.7108541613925933,
+       "high": 0.9734817912030528
+      },
+      "precision": {
+       "successes": 19,
+       "n": 19,
+       "rate": 1.0,
+       "low": 0.8318156346315496,
+       "high": 1.0
+      },
+      "amount_accuracy": {
+       "successes": 19,
+       "n": 19,
+       "rate": 1.0,
+       "low": 0.8318156346315496,
+       "high": 1.0
+      }
+     },
+     "arithmetic": {
+      "recall": {
+       "successes": 19,
+       "n": 22,
+       "rate": 0.8636363636363636,
+       "low": 0.6666458812053,
+       "high": 0.9525108273576373
+      },
+      "precision": {
+       "successes": 19,
+       "n": 172,
+       "rate": 0.11046511627906977,
+       "low": 0.07186731318892836,
+       "high": 0.16608320591462847
+      },
+      "amount_accuracy": {
+       "successes": 10,
+       "n": 19,
+       "rate": 0.5263157894736842,
+       "low": 0.31707482511825114,
+       "high": 0.7267049451255145
+      }
+     },
+     "quantity": {
+      "recall": {
+       "successes": 0,
+       "n": 25,
+       "rate": 0.0,
+       "low": 0.0,
+       "high": 0.13319649395317873
+      },
+      "precision": {
+       "successes": 0,
+       "n": 0,
+       "rate": null,
+       "low": null,
+       "high": null
+      },
+      "amount_accuracy": {
+       "successes": 0,
+       "n": 0,
+       "rate": null,
+       "low": null,
+       "high": null
+      }
+     },
+     "unbundling": {
+      "recall": {
+       "successes": 6,
+       "n": 28,
+       "rate": 0.21428571428571427,
+       "low": 0.10212321701189422,
+       "high": 0.3953894707927388
+      },
+      "precision": {
+       "successes": 6,
+       "n": 6,
+       "rate": 1.0,
+       "low": 0.6096569663469354,
+       "high": 0.9999999999999999
+      },
+      "amount_accuracy": {
+       "successes": 6,
+       "n": 6,
+       "rate": 1.0,
+       "low": 0.6096569663469354,
+       "high": 0.9999999999999999
+      }
+     }
+    }
+   },
+   "money": {
+    "dollar_recall": {
+     "found_cents": 1005990,
+     "total_cents": 2267890,
+     "rate": 0.4435797150655455,
+     "low": 0.33395737761474353,
+     "high": 0.5539064910051673
+    }
+   },
+   "price_benchmark": {
+    "recall": {
+     "successes": 0,
+     "n": 29,
+     "rate": 0.0,
+     "low": 0.0,
+     "high": 0.11697359446555587
+    },
+    "precision": {
+     "successes": 0,
+     "n": 5,
+     "rate": 0.0,
+     "low": 0.0,
+     "high": 0.43449149475208104
+    }
+   },
+   "cannot_check_rate": {
+    "successes": 13,
+    "n": 15,
+    "rate": 0.8666666666666667,
+    "low": 0.6211750079348376,
+    "high": 0.9626395301086407
+   },
+   "trap_pass_rate": {
+    "successes": 26,
+    "n": 27,
+    "rate": 0.9629629629629629,
+    "low": 0.8171614606584348,
+    "high": 0.9934320234669025
+   },
+   "false_alarm_rate_clean": {
+    "successes": 33,
+    "n": 56,
+    "rate": 0.5892857142857143,
+    "low": 0.45877362113703657,
+    "high": 0.7083342102043715
+   }
+  },
+  "generated": {
+   "cases": 210,
+   "valid_outputs": {
+    "successes": 210,
+    "n": 210,
+    "rate": 1.0,
+    "low": 0.9820353008956162,
+    "high": 1.0
+   },
+   "detection": {
+    "all_checks": {
+     "recall": {
+      "successes": 70,
+      "n": 117,
+      "rate": 0.5982905982905983,
+      "low": 0.5077003112164877,
+      "high": 0.6826314950489043
+     },
+     "precision": {
+      "successes": 70,
+      "n": 231,
+      "rate": 0.30303030303030304,
+      "low": 0.2473856330754038,
+      "high": 0.36511913609666796
+     },
+     "amount_accuracy": {
+      "successes": 63,
+      "n": 70,
+      "rate": 0.9,
+      "low": 0.8076687752123195,
+      "high": 0.9507113248938537
+     }
+    },
+    "real_rule_checks": {
+     "recall": {
+      "successes": 64,
+      "n": 68,
+      "rate": 0.9411764705882353,
+      "low": 0.8582811003734307,
+      "high": 0.9768896085194669
+     },
+     "precision": {
+      "successes": 64,
+      "n": 225,
+      "rate": 0.28444444444444444,
+      "low": 0.2294978184755507,
+      "high": 0.34662820056993743
+     },
+     "amount_accuracy": {
+      "successes": 57,
+      "n": 64,
+      "rate": 0.890625,
+      "low": 0.7910113670806147,
+      "high": 0.9459995524731695
+     }
+    },
+    "synthetic_rule_checks": {
+     "recall": {
+      "successes": 6,
+      "n": 49,
+      "rate": 0.12244897959183673,
+      "low": 0.057347477598098245,
+      "high": 0.2424466240188096
+     },
+     "precision": {
+      "successes": 6,
+      "n": 6,
+      "rate": 1.0,
+      "low": 0.6096569663469354,
+      "high": 0.9999999999999999
+     },
+     "amount_accuracy": {
+      "successes": 6,
+      "n": 6,
+      "rate": 1.0,
+      "low": 0.6096569663469354,
+      "high": 0.9999999999999999
+     }
+    },
+    "per_check": {
+     "provider_liability": {
+      "recall": {
+       "successes": 29,
+       "n": 29,
+       "rate": 1.0,
+       "low": 0.8830264055344442,
+       "high": 1.0
+      },
+      "precision": {
+       "successes": 29,
+       "n": 39,
+       "rate": 0.7435897435897436,
+       "low": 0.589180432321585,
+       "high": 0.854313741565478
+      },
+      "amount_accuracy": {
+       "successes": 29,
+       "n": 29,
+       "rate": 1.0,
+       "low": 0.8830264055344442,
+       "high": 1.0
+      }
+     },
+     "duplicate": {
+      "recall": {
+       "successes": 18,
+       "n": 19,
+       "rate": 0.9473684210526315,
+       "low": 0.7536078466345479,
+       "high": 0.99064824750947
+      },
+      "precision": {
+       "successes": 18,
+       "n": 18,
+       "rate": 1.0,
+       "low": 0.8241154494176252,
+       "high": 1.0
+      },
+      "amount_accuracy": {
+       "successes": 18,
+       "n": 18,
+       "rate": 1.0,
+       "low": 0.8241154494176252,
+       "high": 1.0
+      }
+     },
+     "arithmetic": {
+      "recall": {
+       "successes": 17,
+       "n": 20,
+       "rate": 0.85,
+       "low": 0.6395767041130426,
+       "high": 0.9476322080405041
+      },
+      "precision": {
+       "successes": 17,
+       "n": 168,
+       "rate": 0.10119047619047619,
+       "low": 0.06414150874537254,
+       "high": 0.15607059356279968
+      },
+      "amount_accuracy": {
+       "successes": 10,
+       "n": 17,
+       "rate": 0.5882352941176471,
+       "low": 0.36005074385515545,
+       "high": 0.7838921396086862
+      }
+     },
+     "quantity": {
+      "recall": {
+       "successes": 0,
+       "n": 24,
+       "rate": 0.0,
+       "low": 0.0,
+       "high": 0.13798057582897535
+      },
+      "precision": {
+       "successes": 0,
+       "n": 0,
+       "rate": null,
+       "low": null,
+       "high": null
+      },
+      "amount_accuracy": {
+       "successes": 0,
+       "n": 0,
+       "rate": null,
+       "low": null,
+       "high": null
+      }
+     },
+     "unbundling": {
+      "recall": {
+       "successes": 6,
+       "n": 25,
+       "rate": 0.24,
+       "low": 0.11496157730326725,
+       "high": 0.43430059955238565
+      },
+      "precision": {
+       "successes": 6,
+       "n": 6,
+       "rate": 1.0,
+       "low": 0.6096569663469354,
+       "high": 0.9999999999999999
+      },
+      "amount_accuracy": {
+       "successes": 6,
+       "n": 6,
+       "rate": 1.0,
+       "low": 0.6096569663469354,
+       "high": 0.9999999999999999
+      }
+     }
+    }
+   },
+   "money": {
+    "dollar_recall": {
+     "found_cents": 943190,
+     "total_cents": 2040590,
+     "rate": 0.4622143595724766,
+     "low": 0.3377211627259268,
+     "high": 0.5842470664723873
+    }
+   },
+   "price_benchmark": {
+    "recall": {
+     "successes": 0,
+     "n": 29,
+     "rate": 0.0,
+     "low": 0.0,
+     "high": 0.11697359446555587
+    },
+    "precision": {
+     "successes": 0,
+     "n": 5,
+     "rate": 0.0,
+     "low": 0.0,
+     "high": 0.43449149475208104
+    }
+   },
+   "cannot_check_rate": {
+    "successes": 11,
+    "n": 11,
+    "rate": 1.0,
+    "low": 0.7411599827511859,
+    "high": 1.0
+   },
+   "trap_pass_rate": {
+    "successes": 17,
+    "n": 17,
+    "rate": 1.0,
+    "low": 0.8156763396284354,
+    "high": 1.0
+   },
+   "false_alarm_rate_clean": {
+    "successes": 31,
+    "n": 51,
+    "rate": 0.6078431372549019,
+    "low": 0.4708491122516505,
+    "high": 0.7297285514197229
+   }
+  },
+  "hard": {
+   "cases": 30,
+   "valid_outputs": {
+    "successes": 30,
+    "n": 30,
+    "rate": 1.0,
+    "low": 0.8864829086095221,
+    "high": 1.0
+   },
+   "detection": {
+    "all_checks": {
+     "recall": {
+      "successes": 6,
+      "n": 11,
+      "rate": 0.5454545454545454,
+      "low": 0.28008775568998817,
+      "high": 0.7872904245601196
+     },
+     "precision": {
+      "successes": 6,
+      "n": 11,
+      "rate": 0.5454545454545454,
+      "low": 0.28008775568998817,
+      "high": 0.7872904245601196
+     },
+     "amount_accuracy": {
+      "successes": 4,
+      "n": 6,
+      "rate": 0.6666666666666666,
+      "low": 0.29998832134152864,
+      "high": 0.9032306674407831
+     }
+    },
+    "real_rule_checks": {
+     "recall": {
+      "successes": 6,
+      "n": 7,
+      "rate": 0.8571428571428571,
+      "low": 0.48686549668097007,
+      "high": 0.9743210440510253
+     },
+     "precision": {
+      "successes": 6,
+      "n": 11,
+      "rate": 0.5454545454545454,
+      "low": 0.28008775568998817,
+      "high": 0.7872904245601196
+     },
+     "amount_accuracy": {
+      "successes": 4,
+      "n": 6,
+      "rate": 0.6666666666666666,
+      "low": 0.29998832134152864,
+      "high": 0.9032306674407831
+     }
+    },
+    "synthetic_rule_checks": {
+     "recall": {
+      "successes": 0,
+      "n": 4,
+      "rate": 0.0,
+      "low": 0.0,
+      "high": 0.48990002040399916
+     },
+     "precision": {
+      "successes": 0,
+      "n": 0,
+      "rate": null,
+      "low": null,
+      "high": null
+     },
+     "amount_accuracy": {
+      "successes": 0,
+      "n": 0,
+      "rate": null,
+      "low": null,
+      "high": null
+     }
+    },
+    "per_check": {
+     "provider_liability": {
+      "recall": {
+       "successes": 3,
+       "n": 3,
+       "rate": 1.0,
+       "low": 0.43849391955098227,
+       "high": 1.0
+      },
+      "precision": {
+       "successes": 3,
+       "n": 6,
+       "rate": 0.5,
+       "low": 0.18761280689940868,
+       "high": 0.8123871931005913
+      },
+      "amount_accuracy": {
+       "successes": 3,
+       "n": 3,
+       "rate": 1.0,
+       "low": 0.43849391955098227,
+       "high": 1.0
+      }
+     },
+     "duplicate": {
+      "recall": {
+       "successes": 1,
+       "n": 2,
+       "rate": 0.5,
+       "low": 0.09452865480086614,
+       "high": 0.9054713451991339
+      },
+      "precision": {
+       "successes": 1,
+       "n": 1,
+       "rate": 1.0,
+       "low": 0.20654329147389294,
+       "high": 1.0
+      },
+      "amount_accuracy": {
+       "successes": 1,
+       "n": 1,
+       "rate": 1.0,
+       "low": 0.20654329147389294,
+       "high": 1.0
+      }
+     },
+     "arithmetic": {
+      "recall": {
+       "successes": 2,
+       "n": 2,
+       "rate": 1.0,
+       "low": 0.34237195288961925,
+       "high": 1.0
+      },
+      "precision": {
+       "successes": 2,
+       "n": 4,
+       "rate": 0.5,
+       "low": 0.15003570882017148,
+       "high": 0.8499642911798285
+      },
+      "amount_accuracy": {
+       "successes": 0,
+       "n": 2,
+       "rate": 0.0,
+       "low": 0.0,
+       "high": 0.6576280471103807
+      }
+     },
+     "quantity": {
+      "recall": {
+       "successes": 0,
+       "n": 1,
+       "rate": 0.0,
+       "low": 0.0,
+       "high": 0.7934567085261071
+      },
+      "precision": {
+       "successes": 0,
+       "n": 0,
+       "rate": null,
+       "low": null,
+       "high": null
+      },
+      "amount_accuracy": {
+       "successes": 0,
+       "n": 0,
+       "rate": null,
+       "low": null,
+       "high": null
+      }
+     },
+     "unbundling": {
+      "recall": {
+       "successes": 0,
+       "n": 3,
+       "rate": 0.0,
+       "low": 0.0,
+       "high": 0.5615060804490177
+      },
+      "precision": {
+       "successes": 0,
+       "n": 0,
+       "rate": null,
+       "low": null,
+       "high": null
+      },
+      "amount_accuracy": {
+       "successes": 0,
+       "n": 0,
+       "rate": null,
+       "low": null,
+       "high": null
+      }
+     }
+    }
+   },
+   "money": {
+    "dollar_recall": {
+     "found_cents": 62800,
+     "total_cents": 227300,
+     "rate": 0.27628684557853056,
+     "low": 0.053426248548199766,
+     "high": 0.7176470588235294
+    }
+   },
+   "price_benchmark": {
+    "recall": {
+     "successes": 0,
+     "n": 0,
+     "rate": null,
+     "low": null,
+     "high": null
+    },
+    "precision": {
+     "successes": 0,
+     "n": 0,
+     "rate": null,
+     "low": null,
+     "high": null
+    }
+   },
+   "cannot_check_rate": {
+    "successes": 2,
+    "n": 4,
+    "rate": 0.5,
+    "low": 0.15003570882017148,
+    "high": 0.8499642911798285
+   },
+   "trap_pass_rate": {
+    "successes": 9,
+    "n": 10,
+    "rate": 0.9,
+    "low": 0.5958436145024278,
+    "high": 0.9821242504842788
+   },
+   "false_alarm_rate_clean": {
+    "successes": 2,
+    "n": 5,
+    "rate": 0.4,
+    "low": 0.1176182311592533,
+    "high": 0.769280067791163
+   }
+  }
+ }
+}

@@ -1,0 +1,26 @@
+# Secrets and local settings
+.env
+
+# Data: CMS downloads, SQLite, Chroma and local eval cases.
+# Normally these live outside the repo under DATA_DIR; this is a second line of
+# defence so licensed tables can never be committed by accident.
+data/
+*.sqlite
+*.sqlite3
+*.db
+chroma/
+*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Editors and OS
+.idea/
+desktop.ini
+Thumbs.db

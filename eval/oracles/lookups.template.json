@@ -1,0 +1,42 @@
+{
+  "_instructions": [
+    "Copy this file to DATA_DIR/eval/oracles/lookups.json and replace the examples with 10 real oracles.",
+    "Write each expected value from an independent source, never from this project's lookup output:",
+    "  fee_schedule: CMS Physician Fee Schedule Look-Up Tool (2026, the locality, non-facility or facility price), or the raw PFREV .txt opened by hand.",
+    "  charge_benchmark: the CMS 'by Geography and Service' CSV opened by hand (amounts rounded half up to cents).",
+    "  code_pair / unit_limit: synthetic_tables/*.csv read by hand.",
+    "Include some negative cases: a code that is not in the table (status 'not_found' / 'no_edit' / 'not_published') and a date outside the release (status 'no_release').",
+    "Amounts are integer cents: $123.45 is 12345. Dates are YYYY-MM-DD.",
+    "The real file is not committed because it contains real codes and amounts."
+  ],
+  "oracles": [
+    {
+      "id": "pfs-example",
+      "tool": "fee_schedule",
+      "args": {"code": "ZZ001", "modifier": null, "locality_id": "9999901", "setting": "nonfacility", "date_of_service": "2026-11-15"},
+      "expect": {"status": "found", "amount_cents": 12000},
+      "source": "Fake example; for a real oracle say e.g. 'CMS PFS Look-Up Tool, accessed 2026-10-07'"
+    },
+    {
+      "id": "charges-example",
+      "tool": "charge_benchmark",
+      "args": {"code": "ZZ001", "setting": "nonfacility", "date_of_service": "2026-11-15", "state_fips": "06"},
+      "expect": {"status": "found", "avg_submitted_cents": 31050},
+      "source": "Fake example; for a real oracle name the CSV row you read"
+    },
+    {
+      "id": "ptp-example",
+      "tool": "code_pair",
+      "args": {"code_a": "Z1041", "code_b": "Z1040", "date_of_service": "2026-11-15", "modifiers_a": ["59"], "modifiers_b": []},
+      "expect": {"status": "edit", "column1": "Z1040", "modifier_indicator": "0"},
+      "source": "synthetic_tables/ptp_edits.csv line 2, read by hand"
+    },
+    {
+      "id": "mue-example",
+      "tool": "unit_limit",
+      "args": {"code": "Z1080", "date_of_service": "2026-11-15"},
+      "expect": {"status": "not_published"},
+      "source": "synthetic_tables/mue_limits.csv has no Z1080 row"
+    }
+  ]
+}
