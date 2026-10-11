@@ -4,15 +4,17 @@ Audits professional (physician) medical bills against the insurer's EOB, public 
 
 > Research prototype. Not legal or financial advice. Confirm any possible error with the billing office and the insurer. Synthetic bills only.
 
-Status: Milestones 0-2 complete (data, test set with a model-alone baseline, deterministic LangGraph core); Milestone 3 (model-assisted matching and corrective-RAG explanations) built, evaluation in progress. See `PLAN.md`, results in `docs/results/` and design decisions in `docs/decisions/`.
+Status: Milestones 0-3 complete (data; test set with a model-alone baseline; deterministic LangGraph core; model-assisted matching and corrective-RAG explanations with verified quotes). Milestone 4 (retrieval and agent experiments) is next. See `PLAN.md`, results in `docs/results/` and design decisions in `docs/decisions/`.
 
-| Development set (240 bills) | Model alone (Gemini 3.5 Flash-Lite) | Rules only (LangGraph, no model) |
-| --- | --- | --- |
-| Error precision | 0.31 | 1.00 |
-| False alarms on clean bills | 0.59 | 0.00 |
-| Dollar recall | 0.44 | 1.00 |
+| Development set | Model alone (Gemini 3.5 Flash-Lite) | Rules only (LangGraph, no model) | Full system (rules + model for matching and explanations) |
+| --- | --- | --- | --- |
+| Error recall | 0.59 | 0.99 | 1.00 |
+| Error precision | 0.31 | 1.00 | 1.00 |
+| False alarms on clean bills | 0.59 | 0.00 | 0.00 |
+| Dollar recall | 0.44 | 1.00 | 1.00 |
+| Evidence validity (quotes verified verbatim) | n/a | n/a | 1.00 |
 
-The rules-only scores are expected on generated bills built from the same written rules; see `docs/results/m2-rules-only.md` for how to read them.
+Model alone: 240 development bills (Milestone 1); rules only and full system: 243 (three ambiguous-matching hard cases added in Milestone 3). The rules-only and full-system detection scores are expected on generated bills built from the same written rules; see `docs/results/m2-rules-only.md` and `docs/results/m3-full-system.md` for how to read them.
 
 ## Licence notice
 
