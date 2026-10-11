@@ -1,0 +1,31 @@
+{
+  "_about": [
+    "Milestone 4, Part A2 (docs/decisions/0009): does the corrective-RAG grader abstain when the manual has no answer?",
+    "unanswerable: 20 new questions whose topic is absent from the stored Chapters I and XI; each listed term was checked by a plain text match on every manual section (0 occurrences) on 2026-10-11, before any grading. Together with the 3 unanswerable queries in queries.json that makes 23.",
+    "answerable: the first 23 queries in queries.json with expected sections, by id, fixed before any grading.",
+    "Correct behaviour: the grader keeps no passage for an unanswerable question and at least one passage for an answerable one."
+  ],
+  "written_on": "2026-10-11",
+  "unanswerable": [
+    {"id": "u01", "query": "How is ambulance mileage billed for a trip to the emergency room?", "absent_terms": ["ambulance", "mileage"]},
+    {"id": "u02", "query": "Does Medicare pay for hospice care at home and what does the patient owe?", "absent_terms": ["hospice"]},
+    {"id": "u03", "query": "Can a pharmacy charge a dispensing fee on top of the drug price?", "absent_terms": ["pharmacy", "dispensing fee"]},
+    {"id": "u04", "query": "Am I protected by the No Surprises Act from a surprise bill after emergency care?", "absent_terms": ["surprise", "no surprises"]},
+    {"id": "u05", "query": "Which insurer pays first under coordination of benefits when I have two plans?", "absent_terms": ["coordination of benefits", "secondary payer", "secondary insurance"]},
+    {"id": "u06", "query": "Can the hospital add interest or a late fee to an unpaid bill?", "absent_terms": ["interest", "late fee"]},
+    {"id": "u07", "query": "Can unpaid medical debt be sent to a collection agency and appear on my credit report?", "absent_terms": ["credit report", "collection agency", "debt"]},
+    {"id": "u08", "query": "Can I pay this bill from my health savings account or flexible spending account?", "absent_terms": ["health savings", "flexible spending"]},
+    {"id": "u09", "query": "What is the difference between my deductible, coinsurance and copay on this bill?", "absent_terms": ["deductible", "coinsurance", "copay"]},
+    {"id": "u10", "query": "Do I have a right to ask for an itemized bill?", "absent_terms": ["itemized"]},
+    {"id": "u11", "query": "The insurer denied the claim for lack of prior authorization. What can I do?", "absent_terms": ["prior authorization", "preauthorization", "precertification"]},
+    {"id": "u12", "query": "Can an out-of-network doctor balance bill me for the amount my plan did not pay?", "absent_terms": ["out-of-network", "balance bill", "in-network"]},
+    {"id": "u13", "query": "How are anesthesia time units and base units counted on an anesthesia claim?", "absent_terms": ["anesthesia time", "base units", "time units"]},
+    {"id": "u14", "query": "Why was I charged room and board for a semi-private hospital room?", "absent_terms": ["room and board", "semi-private"]},
+    {"id": "u15", "query": "Does the hospital have to offer a payment plan, charity care or financial assistance?", "absent_terms": ["payment plan", "charity care", "financial assistance"]},
+    {"id": "u16", "query": "Are hearing aids covered, and how are they billed?", "absent_terms": ["hearing aid"]},
+    {"id": "u17", "query": "Will insurance pay for cosmetic surgery if the doctor says it was needed?", "absent_terms": ["cosmetic"]},
+    {"id": "u18", "query": "Should a workers' compensation insurer pay for an injury that happened at my job?", "absent_terms": ["workers' compensation", "workers compensation"]},
+    {"id": "u19", "query": "How long is the statute of limitations for a provider to collect an old medical bill?", "absent_terms": ["statute of limitations"]},
+    {"id": "u20", "query": "Does a skilled nursing facility or nursing home stay count toward my benefit period?", "absent_terms": ["nursing home", "skilled nursing facility"]}
+  ]
+}

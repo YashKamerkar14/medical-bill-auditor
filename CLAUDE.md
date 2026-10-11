@@ -104,6 +104,12 @@ Run from the repository root. In a VS Code terminal `UV_PROJECT_ENVIRONMENT` is 
 | Score saved outputs (writes `eval/results/`) | `uv run python -m bill_auditor.evaluation.run_eval score --split dev` |
 | Run and score the rules-only graph (no model, add `--trace` for local traces) | `uv run python -m bill_auditor.evaluation.run_eval score-rules --split dev` |
 | Run and score the full system (free-tier model, cached, capped; resumable) | `uv run python -m bill_auditor.evaluation.run_eval score-full --split dev --max-calls 300` |
+| Milestone 4: retrieval experiment (no model) | `uv run python -m bill_auditor.evaluation.run_eval score-retrieval` |
+| Milestone 4: run the ReAct agent on the locked sample (resumable) | `uv run python -m bill_auditor.evaluation.run_eval run-react --part dev_scored` |
+| Milestone 4: score A, B, C, D on the same sample cases | `uv run python -m bill_auditor.evaluation.run_eval score-m4 --part heldout_scored` |
+| Milestone 4: grader abstention (about 46 model calls) | `uv run python -m bill_auditor.evaluation.run_eval score-abstention` |
+
+Milestone 4 commands use Gemini free tier first and, only after Google's daily quota is gone, the same model through OpenRouter (`OPENROUTER_API_KEY`), hard-capped at $1.00 in total (`--cap-usd`, spend recorded in `DATA_DIR/llm_usage/openrouter_spend_m4.json`). This is the owner's one exception to free-tier-only.
 
 LLM: Google Gemini **free tier only** (`GOOGLE_API_KEY` in `.env`, billing never enabled; model in `LLM_MODEL`, default `gemini-3.5-flash-lite`). Never suggest paid tiers or services. Only synthetic, redacted bills are sent (ADR 0006).
 

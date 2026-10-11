@@ -1,0 +1,514 @@
+{
+ "true_abstention": {
+  "successes": 23,
+  "n": 23,
+  "rate": 1.0,
+  "low": 0.8568788745827374,
+  "high": 1.0
+ },
+ "floor_abstained_unanswerable": 0,
+ "over_abstention": {
+  "successes": 1,
+  "n": 23,
+  "rate": 0.043478260869565216,
+  "low": 0.0077164669621267445,
+  "high": 0.20991586494059142
+ },
+ "kept_an_expected_section": {
+  "successes": 20,
+  "n": 23,
+  "rate": 0.8695652173913043,
+  "low": 0.678721020269818,
+  "high": 0.954624234856553
+ },
+ "invalid_grader_answers": 0,
+ "rows": [
+  {
+   "id": "u01",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u02",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u03",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u04",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u05",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u06",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u07",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u08",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u09",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u10",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u11",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u12",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u13",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u14",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u15",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u16",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u17",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u18",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u19",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "u20",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "q48",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "q49",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "q50",
+   "kind": "unanswerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": []
+  },
+  {
+   "id": "q01",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.E"
+   ],
+   "expected_sections": [
+    "I.E"
+   ]
+  },
+  {
+   "id": "q02",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.D",
+    "XI.U"
+   ],
+   "expected_sections": [
+    "I.D",
+    "I.E",
+    "XI.U"
+   ]
+  },
+  {
+   "id": "q03",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.V"
+   ],
+   "expected_sections": [
+    "I.V"
+   ]
+  },
+  {
+   "id": "q04",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.N"
+   ],
+   "expected_sections": [
+    "I.N"
+   ]
+  },
+  {
+   "id": "q05",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "XI.B"
+   ],
+   "expected_sections": [
+    "XI.B"
+   ]
+  },
+  {
+   "id": "q06",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.E"
+   ],
+   "expected_sections": [
+    "I.P"
+   ]
+  },
+  {
+   "id": "q07",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.R",
+    "I.W"
+   ],
+   "expected_sections": [
+    "I.R",
+    "I.W"
+   ]
+  },
+  {
+   "id": "q08",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.V"
+   ],
+   "expected_sections": [
+    "I.V",
+    "XI.V"
+   ]
+  },
+  {
+   "id": "q09",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [],
+   "expected_sections": [
+    "XI.P"
+   ]
+  },
+  {
+   "id": "q10",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "XI.B",
+    "XI.N"
+   ],
+   "expected_sections": [
+    "XI.N"
+   ]
+  },
+  {
+   "id": "q11",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.C",
+    "I.D",
+    "XI.U",
+    "XI.W"
+   ],
+   "expected_sections": [
+    "I.C",
+    "I.D"
+   ]
+  },
+  {
+   "id": "q12",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.C",
+    "I.G",
+    "XI.W"
+   ],
+   "expected_sections": [
+    "I.G"
+   ]
+  },
+  {
+   "id": "q13",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.J",
+    "XI.W"
+   ],
+   "expected_sections": [
+    "I.J"
+   ]
+  },
+  {
+   "id": "q14",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.H"
+   ],
+   "expected_sections": [
+    "I.K"
+   ]
+  },
+  {
+   "id": "q15",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.C",
+    "I.E",
+    "I.M"
+   ],
+   "expected_sections": [
+    "I.M"
+   ]
+  },
+  {
+   "id": "q16",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.T"
+   ],
+   "expected_sections": [
+    "I.T"
+   ]
+  },
+  {
+   "id": "q17",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.A",
+    "I.O"
+   ],
+   "expected_sections": [
+    "I.O"
+   ]
+  },
+  {
+   "id": "q18",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.S"
+   ],
+   "expected_sections": [
+    "I.S"
+   ]
+  },
+  {
+   "id": "q19",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.B",
+    "I.C"
+   ],
+   "expected_sections": [
+    "I.B"
+   ]
+  },
+  {
+   "id": "q20",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.A"
+   ],
+   "expected_sections": [
+    "I.A"
+   ]
+  },
+  {
+   "id": "q21",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.H",
+    "I.O"
+   ],
+   "expected_sections": [
+    "I.H"
+   ]
+  },
+  {
+   "id": "q22",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.I"
+   ],
+   "expected_sections": [
+    "I.I"
+   ]
+  },
+  {
+   "id": "q23",
+   "kind": "answerable",
+   "floor_abstained": false,
+   "valid": true,
+   "kept_sections": [
+    "I.F"
+   ],
+   "expected_sections": [
+    "I.F"
+   ]
+  }
+ ],
+ "model": "gemini-3.5-flash-lite",
+ "model_calls": {
+  "new": 46,
+  "cached": 0,
+  "providers": {
+   "gemini_free": 46,
+   "openrouter": 0
+  }
+ },
+ "openrouter_spend_usd": 0.0
+}

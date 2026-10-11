@@ -45,6 +45,8 @@ class Tracer:
         self.path = path
         self.events: list[dict] = []
         self._start = time.perf_counter()
+        if path is not None and path.exists():
+            path.unlink()  # one trace per run: re-running a case replaces its old trace
 
     def event(self, name: str, data: dict) -> None:
         record = {"t_ms": round((time.perf_counter() - self._start) * 1000, 1), "node": name, **data}
