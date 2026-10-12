@@ -2,14 +2,16 @@
 
     uv run streamlit run src/bill_auditor/ui/app.py
 
-Runs on this machine only (no hosted demo: CLAUDE.md). Synthetic bills only:
-there is no switch to accept a real bill. The letter step is the human-review
+Synthetic bills only: there is no switch to accept a real bill. With
+BILL_AUDITOR_DEMO=1 (the hosted public demo, demo/streamlit_app.py) there is no
+upload at all: only the committed example bills, rules only, so the demo can
+never receive a real bill (CLAUDE.md, Operations). The letter step is the human-review
 step the guardrails require: nothing is drafted until the person ticks the
 items and confirms they checked them.
 """
 
 import json
-from pathlib import Path
+import os
 
 import streamlit as st
 
@@ -17,18 +19,23 @@ from bill_auditor.config import PROJECT_ROOT
 from bill_auditor.letter.letter import LetterNotAllowed, build_letter, eligible_flags
 from bill_auditor.parsing.schemas import Bill
 from bill_auditor.report.report import NOTICE, render_markdown
-from bill_auditor.ui.core import InputError, load_document, make_auditor
+from bill_auditor.ui.core import InputError, load_document, make_auditor, make_demo_auditor
 
 EXAMPLES = PROJECT_ROOT / "examples"
+DEMO = os.environ.get("BILL_AUDITOR_DEMO") == "1"
 
 st.set_page_config(page_title="Medical Bill Auditor", layout="wide")
 st.title("Medical Bill Auditor")
 st.warning(f"{NOTICE} Synthetic test bills only: never upload a real bill.")
+if DEMO:
+    st.info("Public demo: choose one of the synthetic example bills (uploads are switched off). It runs the rules-only "
+            "system on synthetic rule tables. The full system, with AI-assisted matching, manual-grounded explanations "
+            "and Medicare data, runs locally: see the README on GitHub.")
 
 
 @st.cache_resource(show_spinner="Loading the reference tables...")
 def auditor(mode: str):
-    return make_auditor(mode)
+    return make_demo_auditor() if DEMO else make_auditor(mode)
 
 
 def example_choices() -> dict[str, dict]:
@@ -38,7 +45,7 @@ def example_choices() -> dict[str, dict]:
 
 with st.sidebar:
     st.header("Bill")
-    source = st.radio("Source", ["Example", "Upload"], horizontal=True)
+    source = "Example" if DEMO else st.radio("Source", ["Example", "Upload"], horizontal=True)
     bill_raw = eob_raw = None
     error = None
     try:
@@ -65,8 +72,12 @@ with st.sidebar:
     except InputError as exc:
         error = str(exc)
     st.header("System")
-    mode = st.radio("Mode", ["rules", "full"], format_func=lambda m: {"rules": "Rules only (no model, free)",
-                    "full": "Full system (free-tier Gemini for matching and explanations)"}[m])
+    if DEMO:
+        mode = "rules"
+        st.caption("Rules only (the public demo uses no model)")
+    else:
+        mode = st.radio("Mode", ["rules", "full"], format_func=lambda m: {"rules": "Rules only (no model, free)",
+                        "full": "Full system (free-tier Gemini for matching and explanations)"}[m])
     run_clicked = st.button("Audit", type="primary", disabled=bill_raw is None)
 
 if error:

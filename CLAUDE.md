@@ -114,6 +114,7 @@ Run from the repository root. In a VS Code terminal `UV_PROJECT_ENVIRONMENT` is 
 | Milestone 6: adversarial suite, live (full system, free tier, cached; deterministic half is `tests/test_adversarial.py`) | `uv run python -m bill_auditor.evaluation.run_eval red-team` |
 | Milestone 7: audit one bill (JSON or PDF; `--full` uses the model; `--letter X --i-have-reviewed` drafts a letter) | `uv run python -m bill_auditor.audit examples/hard-m01-bill.pdf --eob examples/hard-m01-eob.pdf` |
 | Milestone 7: the app (local only) | `uv run streamlit run src/bill_auditor/ui/app.py` |
+| Public demo (examples only, no uploads, rules only; hosted entry point) | `uv run streamlit run demo/streamlit_app.py` |
 | Milestone 7: rebuild the committed examples | `uv run python scripts/make_examples.py` |
 | Milestone 7: PDF render-and-parse accuracy | `uv run python -m bill_auditor.evaluation.run_eval pdf-accuracy` |
 

@@ -43,7 +43,7 @@ from bill_auditor.db import connect
 from bill_auditor.guardrails.pii import UnsafePayload
 from bill_auditor.guardrails.quotes import verify_quote
 from bill_auditor.guardrails.verify import verify
-from bill_auditor.llm.gemini import ModelCallFailed, RateLimited
+from bill_auditor.llm.types import ModelCallFailed, RateLimited
 from bill_auditor.llm.guarded import BudgetExhausted
 from bill_auditor.lookups import DirectLookups, Lookups
 from bill_auditor.parsing.intake import intake, unknown_lines

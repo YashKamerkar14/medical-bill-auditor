@@ -59,6 +59,18 @@ class Auditor:
         return f"{self.llm.calls} new model calls, {self.llm.cache_hits} from cache ({self.llm.used_today()} today)"
 
 
+def make_demo_auditor() -> Auditor:
+    """The public demo: rules only, on a database built from the committed synthetic tables (no CMS data)."""
+    import tempfile
+
+    from bill_auditor.demo import build_demo_db
+
+    db = build_demo_db(Path(tempfile.gettempdir()) / "bill-auditor-demo.sqlite")
+    return Auditor("rules", build_graph(db), notes=[
+        "Public demo: rules only, synthetic code-pair and unit-limit tables; the Medicare fee schedule and the "
+        "model (AI matching, manual explanations) run only in a local install."])
+
+
 def make_auditor(mode: str = "rules") -> Auditor:
     paths = load_paths()
     if not paths.sqlite_path.exists():

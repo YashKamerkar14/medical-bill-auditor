@@ -9,30 +9,14 @@
   kept so an invalid answer can be inspected.
 """
 
-from dataclasses import dataclass
-
 from google import genai
 from google.genai import errors, types
 from pydantic import BaseModel, ValidationError
 
+from bill_auditor.llm.types import ModelCallFailed, RateLimited, StructuredResult  # noqa: F401 (re-exported)
+
 DEFAULT_MODEL = "gemini-3.5-flash-lite"  # free tier; owner's choice 2026-10-07 after Flash models kept returning 503 (ADR 0006)
 TIMEOUT_MS = 180_000
-
-
-class RateLimited(RuntimeError):
-    """The free-tier quota (per minute or per day) is used up: stop and resume later."""
-
-
-class ModelCallFailed(RuntimeError):
-    """Any other API error."""
-
-
-@dataclass
-class StructuredResult:
-    parsed: BaseModel | None  # None when the answer did not match the schema
-    raw_text: str
-    usage: dict
-    error: str | None = None
 
 
 class GeminiClient:

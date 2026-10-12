@@ -1,0 +1,12 @@
+# Dependencies of the hosted public demo only (rules-only, example bills).
+# Same exact versions as uv.lock; the full system's model, vector index and MCP
+# libraries are not needed here. Streamlit Community Cloud reads this file
+# because it sits next to the entry point; choose Python 3.11 when deploying.
+streamlit==1.64.0
+langgraph==1.2.14
+langchain-core==1.6.7
+pydantic==2.13.5
+python-dotenv==1.2.4
+pdfplumber==0.11.10
+fpdf2==2.8.8
+anyio==4.15.1

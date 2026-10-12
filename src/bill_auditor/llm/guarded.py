@@ -20,7 +20,7 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from bill_auditor.guardrails.pii import assert_safe_to_send
-from bill_auditor.llm.gemini import ModelCallFailed, StructuredResult
+from bill_auditor.llm.types import ModelCallFailed, StructuredResult
 
 BUSY_WAITS_S = (30, 60, 120)
 

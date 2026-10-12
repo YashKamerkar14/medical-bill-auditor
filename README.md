@@ -6,6 +6,14 @@ An AI system that checks a US doctor's (professional) medical bill, and the insu
 
 Built with LangGraph (agent workflow), corrective RAG over the NCCI Policy Manual (hybrid BM25 + vector retrieval), its own MCP server for all evidence lookups, and Google Gemini (free tier). Python 3.11, managed with uv.
 
+## Public demo
+
+A public demo runs the real app on the six example bills (uploads are switched off, so it can never receive a real bill). It runs the rules-only system on the synthetic rule tables, without Medicare data or the model; the full system runs in a local install (below).
+
+To host your own copy for free on [Streamlit Community Cloud](https://share.streamlit.io): sign in with GitHub, choose **Create app**, pick this repository and branch `main`, set the main file path to `demo/streamlit_app.py`, open **Advanced settings** and choose Python **3.11**, then **Deploy**. The demo needs no secrets: it installs only `demo/requirements.txt` and builds a small database from `synthetic_tables/` at start-up.
+
+Run the same demo locally with `uv run streamlit run demo/streamlit_app.py`.
+
 ## Results
 
 All numbers are measured on synthetic bills (300 generated plus 48 hand-written hard cases). Development and held-out splits; the held-out split was scored only at milestone ends. Full write-ups are in [`docs/results/`](docs/results/).
