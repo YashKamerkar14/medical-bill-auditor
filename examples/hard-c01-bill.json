@@ -1,0 +1,55 @@
+{
+ "synthetic": true,
+ "bill_id": "BILL-hard-c01",
+ "bill_type": "institutional",
+ "statement_date": "2026-11-24",
+ "patient": {
+  "name": "Katherine Smith",
+  "date_of_birth": "1957-07-11",
+  "address": "557 Gonzalez Springs, Danielleborough, WI 14692",
+  "account_number": "ACCT-58941730",
+  "member_id": null
+ },
+ "provider": {
+  "name": "Diaz Medical Group",
+  "npi": "9100000001",
+  "locality_id": "0111205"
+ },
+ "lines": [
+  {
+   "line_no": 1,
+   "date_of_service": "2026-11-10",
+   "code": "Z1001",
+   "modifiers": [],
+   "units": 1,
+   "unit_price_cents": 12000,
+   "charge_cents": 12000,
+   "place_of_service": "11",
+   "rendering_provider_npi": "9100000001",
+   "description": "Synthetic office visit, established patient",
+   "insurance_paid_cents": null,
+   "adjustment_cents": null,
+   "patient_balance_cents": null
+  },
+  {
+   "line_no": 2,
+   "date_of_service": "2026-11-10",
+   "code": "Z1050",
+   "modifiers": [],
+   "units": 1,
+   "unit_price_cents": 30000,
+   "charge_cents": 30000,
+   "place_of_service": "11",
+   "rendering_provider_npi": "9100000001",
+   "description": "Synthetic imaging study",
+   "insurance_paid_cents": null,
+   "adjustment_cents": null,
+   "patient_balance_cents": null
+  }
+ ],
+ "total_charges_cents": 42000,
+ "payments_cents": 0,
+ "adjustments_cents": 0,
+ "balance_due_cents": 42000,
+ "notes": ""
+}

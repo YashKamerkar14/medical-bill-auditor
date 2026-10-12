@@ -1,0 +1,70 @@
+{
+ "synthetic": true,
+ "bill_id": "BILL-hard-m01",
+ "bill_type": "professional",
+ "statement_date": "2026-11-24",
+ "patient": {
+  "name": "Evelyn Wong",
+  "date_of_birth": "1979-09-15",
+  "address": "02963 Andrew Park, Kimberlyport, SC 47082",
+  "account_number": "ACCT-52649256",
+  "member_id": "MBR584274703"
+ },
+ "provider": {
+  "name": "Wallace Medical Group",
+  "npi": "9100000001",
+  "locality_id": "0111205"
+ },
+ "lines": [
+  {
+   "line_no": 1,
+   "date_of_service": "2026-11-10",
+   "code": "Z1001",
+   "modifiers": [],
+   "units": 1,
+   "unit_price_cents": 12000,
+   "charge_cents": 12000,
+   "place_of_service": "11",
+   "rendering_provider_npi": "9100000001",
+   "description": "Synthetic office visit, established patient",
+   "insurance_paid_cents": 6400,
+   "adjustment_cents": 4000,
+   "patient_balance_cents": 1600
+  },
+  {
+   "line_no": 2,
+   "date_of_service": "2026-11-10",
+   "code": "Z1010",
+   "modifiers": [],
+   "units": 1,
+   "unit_price_cents": 25000,
+   "charge_cents": 25000,
+   "place_of_service": "11",
+   "rendering_provider_npi": "9100000001",
+   "description": "Synthetic minor skin procedure",
+   "insurance_paid_cents": 12800,
+   "adjustment_cents": 0,
+   "patient_balance_cents": 12200
+  },
+  {
+   "line_no": 3,
+   "date_of_service": "2026-11-10",
+   "code": "Z1050",
+   "modifiers": [],
+   "units": 1,
+   "unit_price_cents": 30000,
+   "charge_cents": 30000,
+   "place_of_service": "11",
+   "rendering_provider_npi": "9100000001",
+   "description": "Synthetic imaging study",
+   "insurance_paid_cents": 16000,
+   "adjustment_cents": 10000,
+   "patient_balance_cents": 4000
+  }
+ ],
+ "total_charges_cents": 67000,
+ "payments_cents": 35200,
+ "adjustments_cents": 14000,
+ "balance_due_cents": 17800,
+ "notes": ""
+}

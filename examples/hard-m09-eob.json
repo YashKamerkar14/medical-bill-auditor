@@ -1,0 +1,56 @@
+{
+ "synthetic": true,
+ "eob_id": "EOB-hard-m09",
+ "payer_name": "Synthetic Health Plan",
+ "member_id": "MBR105294522",
+ "patient_name": "Danielle Riley",
+ "claim_bill_id": "BILL-hard-m09",
+ "lines": [
+  {
+   "line_no": 1,
+   "date_of_service": "2026-11-10",
+   "code": "Z1010",
+   "modifiers": [],
+   "units": 1,
+   "billed_cents": 25000,
+   "allowed_cents": 16000,
+   "paid_cents": 12800,
+   "adjustments": [
+    {
+     "group_code": "CO",
+     "reason_code": "45",
+     "amount_cents": 9000
+    },
+    {
+     "group_code": "PR",
+     "reason_code": "2",
+     "amount_cents": 3200
+    }
+   ],
+   "remark": "Left forearm lesion"
+  },
+  {
+   "line_no": 2,
+   "date_of_service": "2026-11-10",
+   "code": "Z1010",
+   "modifiers": [],
+   "units": 1,
+   "billed_cents": 25000,
+   "allowed_cents": 16000,
+   "paid_cents": 12800,
+   "adjustments": [
+    {
+     "group_code": "CO",
+     "reason_code": "45",
+     "amount_cents": 9000
+    },
+    {
+     "group_code": "PR",
+     "reason_code": "2",
+     "amount_cents": 3200
+    }
+   ],
+   "remark": "Right forearm lesion"
+  }
+ ]
+}

@@ -1,0 +1,59 @@
+{
+ "synthetic": true,
+ "bill_id": "BILL-hard-m09",
+ "bill_type": "professional",
+ "statement_date": "2026-11-24",
+ "patient": {
+  "name": "Danielle Riley",
+  "date_of_birth": "1983-04-23",
+  "address": "667 Byrd Fords Suite 379, Josetown, AK 69742",
+  "account_number": "ACCT-87467802",
+  "member_id": "MBR105294522"
+ },
+ "provider": {
+  "name": "Miller Medical Group",
+  "npi": "9100000001",
+  "locality_id": "0111205"
+ },
+ "lines": [
+  {
+   "line_no": 1,
+   "date_of_service": "2026-11-10",
+   "code": "Z1010",
+   "modifiers": [
+    "RT"
+   ],
+   "units": 1,
+   "unit_price_cents": 25000,
+   "charge_cents": 25000,
+   "place_of_service": "11",
+   "rendering_provider_npi": "9100000001",
+   "description": "Synthetic minor skin procedure, right forearm",
+   "insurance_paid_cents": 12800,
+   "adjustment_cents": 0,
+   "patient_balance_cents": 12200
+  },
+  {
+   "line_no": 2,
+   "date_of_service": "2026-11-10",
+   "code": "Z1010",
+   "modifiers": [
+    "LT"
+   ],
+   "units": 1,
+   "unit_price_cents": 25000,
+   "charge_cents": 25000,
+   "place_of_service": "11",
+   "rendering_provider_npi": "9100000001",
+   "description": "Synthetic minor skin procedure, left forearm",
+   "insurance_paid_cents": 12800,
+   "adjustment_cents": 9000,
+   "patient_balance_cents": 3200
+  }
+ ],
+ "total_charges_cents": 50000,
+ "payments_cents": 25600,
+ "adjustments_cents": 9000,
+ "balance_due_cents": 15400,
+ "notes": ""
+}

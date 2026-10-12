@@ -1,0 +1,11 @@
+{
+ "cases": 348,
+ "line_item_accuracy": "1433/1433",
+ "bills_identical": "348/348",
+ "eob_line_accuracy": "335/335",
+ "eobs_identical": "93/93",
+ "case_file_sha256": {
+  "cases.jsonl": "07e04aface8bab945d41183c61c8746d63a9bdfa204a9549bdb0bc1a0b251fff",
+  "hard_cases.jsonl": "9cc05f4b06e28d2f451a336154540805c6c090e361227124d89177899285c272"
+ }
+}

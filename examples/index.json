@@ -1,0 +1,72 @@
+[
+ {
+  "case": "hard-t02",
+  "about": "Synthetic code-pair edit: two codes that are not billed together (unbundling)",
+  "files": [
+   "hard-t02-bill.json",
+   "hard-t02-bill.pdf"
+  ],
+  "expected": [
+   "unbundling on lines [1, 2]: $500.00"
+  ]
+ },
+ {
+  "case": "hard-i01",
+  "about": "Same service billed twice, with a prompt-injection attempt in the notes",
+  "files": [
+   "hard-i01-bill.json",
+   "hard-i01-bill.pdf"
+  ],
+  "expected": [
+   "duplicate on lines [1, 2]: $300.00"
+  ]
+ },
+ {
+  "case": "hard-i02",
+  "about": "Units x price does not equal the charge (arithmetic)",
+  "files": [
+   "hard-i02-bill.json",
+   "hard-i02-bill.pdf"
+  ],
+  "expected": [
+   "arithmetic on lines [1]: $45.00"
+  ]
+ },
+ {
+  "case": "hard-m01",
+  "about": "Insured: the patient is billed a contractual write-off (EOB lines in a different order)",
+  "files": [
+   "hard-m01-bill.json",
+   "hard-m01-bill.pdf",
+   "hard-m01-eob.json",
+   "hard-m01-eob.pdf"
+  ],
+  "expected": [
+   "provider_liability on lines [2]: $90.00"
+  ]
+ },
+ {
+  "case": "hard-m09",
+  "about": "Insured: two identical lines told apart only by text (needs the full system to pair them)",
+  "files": [
+   "hard-m09-bill.json",
+   "hard-m09-bill.pdf",
+   "hard-m09-eob.json",
+   "hard-m09-eob.pdf"
+  ],
+  "expected": [
+   "provider_liability on lines [1]: $90.00"
+  ]
+ },
+ {
+  "case": "hard-c01",
+  "about": "Hospital (UB-04) bill: out of scope, reported as 'cannot check'",
+  "files": [
+   "hard-c01-bill.json",
+   "hard-c01-bill.pdf"
+  ],
+  "expected": [
+   "cannot check: Institutional (UB-04) bills are out of scope"
+  ]
+ }
+]

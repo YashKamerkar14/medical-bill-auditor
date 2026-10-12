@@ -480,6 +480,36 @@ def cmd_red_team(args) -> None:
     print(f"saved {out.relative_to(PROJECT_ROOT)}")
 
 
+def cmd_pdf_accuracy(args) -> None:
+    """Milestone 7: render every test bill and EOB as a PDF, parse it back, compare field by field."""
+    from bill_auditor.parsing.pdf import parse_bill_pdf, parse_eob_pdf, render_bill_pdf, render_eob_pdf
+    from bill_auditor.parsing.schemas import Bill, Eob
+
+    paths = load_paths()
+    cases = load_cases(paths, "all")
+    lines = lines_ok = bills_ok = eobs = eobs_ok = eob_lines = eob_lines_ok = 0
+    for case in cases:
+        bill = Bill.model_validate(parse_bill_pdf(render_bill_pdf(case.bill)))
+        lines += len(case.bill.lines)
+        lines_ok += sum(a == b for a, b in zip(case.bill.lines, bill.lines))
+        bills_ok += bill == case.bill
+        if case.eob is not None:
+            eob = Eob.model_validate(parse_eob_pdf(render_eob_pdf(case.eob)))
+            eobs += 1
+            eobs_ok += eob == case.eob
+            eob_lines += len(case.eob.lines)
+            eob_lines_ok += sum(a == b for a, b in zip(case.eob.lines, eob.lines))
+    result = {"cases": len(cases), "line_item_accuracy": f"{lines_ok}/{lines}", "bills_identical": f"{bills_ok}/{len(cases)}",
+              "eob_line_accuracy": f"{eob_lines_ok}/{eob_lines}", "eobs_identical": f"{eobs_ok}/{eobs}",
+              "case_file_sha256": {f.name if f.parent.name != "hard_cases" else "hard_cases.jsonl": _file_hash(f)
+                                   for f in case_files(paths)}}
+    print(result)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    out = RESULTS_DIR / f"m7_pdf_accuracy_{stamp}.json"
+    out.write_text(json.dumps(result, indent=1), encoding="utf-8")
+    print(f"saved {out.relative_to(PROJECT_ROOT)}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(required=True)
@@ -539,6 +569,8 @@ def main() -> None:
     red_p.add_argument("--via", choices=["direct", "mcp"], default="mcp", help="how lookups are made")
     red_p.add_argument("--no-baseline", action="store_true", help="skip the model-alone contrast")
     red_p.set_defaults(func=cmd_red_team)
+    pdf_p = sub.add_parser("pdf-accuracy", help="Milestone 7: PDF render-and-parse accuracy on every test bill")
+    pdf_p.set_defaults(func=cmd_pdf_accuracy)
     args = parser.parse_args()
     args.func(args)
 

@@ -1,0 +1,57 @@
+{
+ "synthetic": true,
+ "bill_id": "BILL-hard-t02",
+ "bill_type": "professional",
+ "statement_date": "2026-11-24",
+ "patient": {
+  "name": "Nicole Martin",
+  "date_of_birth": "1987-01-03",
+  "address": "21817 Kathy Roads, North Krystalfurt, NY 51128",
+  "account_number": "ACCT-05175917",
+  "member_id": null
+ },
+ "provider": {
+  "name": "Taylor Medical Group",
+  "npi": "9100000001",
+  "locality_id": "0111205"
+ },
+ "lines": [
+  {
+   "line_no": 1,
+   "date_of_service": "2026-11-10",
+   "code": "Z1040",
+   "modifiers": [],
+   "units": 1,
+   "unit_price_cents": 90000,
+   "charge_cents": 90000,
+   "place_of_service": "11",
+   "rendering_provider_npi": "9100000001",
+   "description": "Synthetic knee procedure, comprehensive",
+   "insurance_paid_cents": null,
+   "adjustment_cents": null,
+   "patient_balance_cents": null
+  },
+  {
+   "line_no": 2,
+   "date_of_service": "2026-11-10",
+   "code": "Z1041",
+   "modifiers": [
+    "59"
+   ],
+   "units": 1,
+   "unit_price_cents": 50000,
+   "charge_cents": 50000,
+   "place_of_service": "11",
+   "rendering_provider_npi": "9100000001",
+   "description": "Synthetic knee procedure, limited",
+   "insurance_paid_cents": null,
+   "adjustment_cents": null,
+   "patient_balance_cents": null
+  }
+ ],
+ "total_charges_cents": 140000,
+ "payments_cents": 0,
+ "adjustments_cents": 0,
+ "balance_due_cents": 140000,
+ "notes": ""
+}

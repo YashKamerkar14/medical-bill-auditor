@@ -1,0 +1,79 @@
+{
+ "synthetic": true,
+ "eob_id": "EOB-hard-m01",
+ "payer_name": "Synthetic Health Plan",
+ "member_id": "MBR584274703",
+ "patient_name": "Evelyn Wong",
+ "claim_bill_id": "BILL-hard-m01",
+ "lines": [
+  {
+   "line_no": 1,
+   "date_of_service": "2026-11-10",
+   "code": "Z1050",
+   "modifiers": [],
+   "units": 1,
+   "billed_cents": 30000,
+   "allowed_cents": 20000,
+   "paid_cents": 16000,
+   "adjustments": [
+    {
+     "group_code": "CO",
+     "reason_code": "45",
+     "amount_cents": 10000
+    },
+    {
+     "group_code": "PR",
+     "reason_code": "2",
+     "amount_cents": 4000
+    }
+   ],
+   "remark": ""
+  },
+  {
+   "line_no": 2,
+   "date_of_service": "2026-11-10",
+   "code": "Z1001",
+   "modifiers": [],
+   "units": 1,
+   "billed_cents": 12000,
+   "allowed_cents": 8000,
+   "paid_cents": 6400,
+   "adjustments": [
+    {
+     "group_code": "CO",
+     "reason_code": "45",
+     "amount_cents": 4000
+    },
+    {
+     "group_code": "PR",
+     "reason_code": "2",
+     "amount_cents": 1600
+    }
+   ],
+   "remark": ""
+  },
+  {
+   "line_no": 3,
+   "date_of_service": "2026-11-10",
+   "code": "Z1010",
+   "modifiers": [],
+   "units": 1,
+   "billed_cents": 25000,
+   "allowed_cents": 16000,
+   "paid_cents": 12800,
+   "adjustments": [
+    {
+     "group_code": "CO",
+     "reason_code": "45",
+     "amount_cents": 9000
+    },
+    {
+     "group_code": "PR",
+     "reason_code": "2",
+     "amount_cents": 3200
+    }
+   ],
+   "remark": ""
+  }
+ ]
+}
