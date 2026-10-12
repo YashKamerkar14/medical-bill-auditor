@@ -14,6 +14,7 @@ import sqlite3
 from pydantic import BaseModel, ValidationError
 
 from bill_auditor.checks.models import CannotCheck
+from bill_auditor.guardrails.injection import scan
 from bill_auditor.parsing.schemas import Bill, Eob
 from bill_auditor.tables.codes import is_known_code
 from bill_auditor.tables.releases import find_release
@@ -30,6 +31,7 @@ class IntakeResult(BaseModel):
     table_checks: bool = False          # False: dates have no loaded release, so no table lookups
     cannot_check: list[CannotCheck] = []
     releases: dict[str, str] = {}       # dataset -> release label used for this bill
+    input_warnings: list[str] = []      # free text that looks like instructions to an AI (Milestone 6)
 
 
 def _validation_message(what: str, error: ValidationError) -> str:
@@ -53,7 +55,9 @@ def intake(conn: sqlite3.Connection, raw_bill, raw_eob=None, allow_non_synthetic
     if eob is not None and eob.claim_bill_id != bill.bill_id:
         return IntakeResult(accepted=False, errors=[f"The EOB answers bill {eob.claim_bill_id}, not {bill.bill_id}."])
 
-    result = IntakeResult(accepted=True, bill=bill, eob=eob)
+    result = IntakeResult(accepted=True, bill=bill, eob=eob, input_warnings=[
+        f"{where} contains text that looks like instructions to an AI ({', '.join(found)}); it was treated as data "
+        "and not shown to the model" for where, found in scan(bill, eob)])
     if bill.bill_type != "professional":
         result.cannot_check.append(CannotCheck(check=None, target="bill",
                                                reason="Institutional (UB-04) bills are out of scope"))

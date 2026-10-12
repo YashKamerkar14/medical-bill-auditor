@@ -22,12 +22,13 @@ from bill_auditor.db import connect
 from bill_auditor.evaluation.metrics import is_clean_case, score_case, summarise
 from bill_auditor.evaluation.schemas import Case, PredictedFlag
 from bill_auditor.evaluation.stats import holm, mcnemar_exact, paired_bootstrap_diff
+from bill_auditor.guardrails.pii import UnsafePayload
 from bill_auditor.guardrails.quotes import verify_quote
 from bill_auditor.llm.gemini import ModelCallFailed, RateLimited
 from bill_auditor.llm.guarded import BudgetExhausted
 
 PROMPT_VERSION = hashlib.sha256((REACT_SYSTEM + json.dumps(ReActStep.model_json_schema())).encode()).hexdigest()[:12]
-MODEL_FAILURES = (RateLimited, ModelCallFailed, BudgetExhausted)
+MODEL_FAILURES = (RateLimited, ModelCallFailed, BudgetExhausted, UnsafePayload)
 
 
 def required_lookups(case: Case) -> set[tuple]:

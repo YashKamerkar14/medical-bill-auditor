@@ -40,6 +40,7 @@ from bill_auditor.checks import arithmetic, duplicates, liability, price, quanti
 from bill_auditor.checks.context import CheckContext
 from bill_auditor.checks.matching import LineMatch, match_lines
 from bill_auditor.db import connect
+from bill_auditor.guardrails.pii import UnsafePayload
 from bill_auditor.guardrails.quotes import verify_quote
 from bill_auditor.guardrails.verify import verify
 from bill_auditor.llm.gemini import ModelCallFailed, RateLimited
@@ -142,6 +143,9 @@ def build_graph(db_path: Path, llm=None, chroma=None, embedder=None, lookups: Lo
         except MODEL_ERRORS as error:
             explanation = Explanation(flag_id=flag.flag_id, status="not_explained", note=f"model unavailable: {error}")
             return {"explanations": {flag.flag_id: explanation}, "model_failures": [f"explain: {error}"], "steps_used": 1}
+        except UnsafePayload as error:  # personal data would have been sent: nothing was, fail closed
+            explanation = Explanation(flag_id=flag.flag_id, status="not_explained", note=f"not sent: {error}")
+            return {"explanations": {flag.flag_id: explanation}, "steps_used": 1}
         except GraphRecursionError:
             explanation = Explanation(flag_id=flag.flag_id, status="not_explained", note="explain step limit reached")
             return {"explanations": {flag.flag_id: explanation}, "steps_used": 1}
@@ -165,7 +169,7 @@ def build_graph(db_path: Path, llm=None, chroma=None, embedder=None, lookups: Lo
             bill_id=result.bill.bill_id if result.bill else None, status=status, model=model_label,
             releases=result.releases, flags=state.get("verified_flags", []), cannot=state.get("cannot_check", []),
             dropped=state.get("dropped_flags", []), problems=result.errors, steps_used=state.get("steps_used", 0) + 1,
-            explanations=state.get("explanations", {}),
+            explanations=state.get("explanations", {}), input_warnings=result.input_warnings,
         )
         return {"report": report, "steps_used": 1}
 

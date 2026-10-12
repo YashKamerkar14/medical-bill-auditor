@@ -28,7 +28,7 @@ from typing_extensions import TypedDict
 from bill_auditor.checks.models import Flag
 from bill_auditor.db import connect
 from bill_auditor.guardrails.quotes import verify_quote
-from bill_auditor.guardrails.wording import BANNED_WORDS
+from bill_auditor.guardrails.wording import wording_problem
 from bill_auditor.lookups import LookupUnavailable
 from bill_auditor.retrieval.models import SearchHit
 
@@ -149,7 +149,10 @@ def build_explain_graph(db_path: Path, lookups, llm):
         hits = state["hits"]
         if not hits:
             return {"relevant": []}
-        answer = llm.structured(GRADE_SYSTEM, f"{_facts(state['flag'])}\n\nPASSAGES:\n{_passages(hits)}", Grade).parsed
+        prompt = f"{_facts(state['flag'])}\n\nPASSAGES:\n{_passages(hits)}"
+        answer = llm.structured(GRADE_SYSTEM, prompt, Grade).parsed
+        if answer is None:  # did not match the schema: regenerate once
+            answer = llm.structured(GRADE_SYSTEM, prompt, Grade).parsed
         keep = set(answer.relevant_passage_ids) if answer else set()
         return {"relevant": [h for h in hits if h.chunk_id in keep]}  # ids the model invented are ignored
 
@@ -160,7 +163,10 @@ def build_explain_graph(db_path: Path, lookups, llm):
 
     def rewrite(state: ExplainState) -> dict:
         tried = "\n".join(f"- {q}" for q in state["queries"])
-        answer = llm.structured(REWRITE_SYSTEM, f"{_facts(state['flag'])}\n\nQueries already tried:\n{tried}", Rewrite).parsed
+        prompt = f"{_facts(state['flag'])}\n\nQueries already tried:\n{tried}"
+        answer = llm.structured(REWRITE_SYSTEM, prompt, Rewrite).parsed
+        if answer is None:  # did not match the schema: regenerate once
+            answer = llm.structured(REWRITE_SYSTEM, prompt, Rewrite).parsed
         query = answer.query if answer and answer.query.strip() else initial_query(state["flag"])
         return {"query": query, "queries": state["queries"] + [query], "rewrites": state["rewrites"] + 1}
 
@@ -189,8 +195,9 @@ def build_explain_graph(db_path: Path, lookups, llm):
             problems.append("no quote given")
         if not written.explanation.strip():
             problems.append("no explanation given")
-        if BANNED_WORDS.search(written.explanation):
-            problems.append("wording is not neutral")
+        if wording_problem(written.explanation):
+            problems.append(f"wording is not neutral ({wording_problem(written.explanation)}): describe a possible "
+                            "billing error to verify, with no opinion on intent, care or legal action")
         proposed = state["quotes_proposed"] + len(written.quotes)
         common = dict(flag_id=flag.flag_id, queries=state["queries"], rewrites=state["rewrites"], writes=state["writes"],
                       quotes_proposed=proposed)

@@ -16,7 +16,8 @@ def _summarise(update: dict) -> dict:
     for key, value in update.items():
         if key == "intake":
             out[key] = {"accepted": value.accepted, "in_scope": value.in_scope, "table_checks": value.table_checks,
-                        "errors": value.errors, "releases": value.releases}
+                        "errors": value.errors, "releases": value.releases,
+                        "input_warnings": len(value.input_warnings)}
         elif key == "matches":
             out[key] = [(m.bill_line, m.eob_line, m.method) for m in value]
         elif key in ("candidate_flags", "verified_flags"):

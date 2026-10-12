@@ -19,6 +19,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
+from bill_auditor.guardrails.pii import assert_safe_to_send
 from bill_auditor.llm.gemini import ModelCallFailed, StructuredResult
 
 BUSY_WAITS_S = (30, 60, 120)
@@ -66,6 +67,7 @@ class GuardedLLM:
         path.write_text(json.dumps({"calls": self.used_today() + 1, "model": self.model}))
 
     def structured(self, system: str, user: str, schema: type[BaseModel]) -> StructuredResult:
+        assert_safe_to_send(system + "\n" + user)  # generic personal-data patterns: nothing is sent if one is found
         key = self._key(system, user, schema)
         cached = self.cache_dir / f"{key}.json"
         if cached.exists():

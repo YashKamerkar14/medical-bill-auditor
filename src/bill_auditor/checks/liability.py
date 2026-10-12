@@ -37,9 +37,15 @@ def run(ctx: CheckContext) -> CheckResult:
         extra = line.patient_balance_cents - owed
         if extra <= 0:
             continue
+        # A pair proposed by the model passed code validation, but when two EOB lines bill the same amount code
+        # cannot tell a right pairing from a wrong one (red team, Milestone 6): such a flag is never high
+        # confidence, so it is not used for a letter, and the person is told to confirm the pairing.
+        by_model = match.method == "model"
+        note = (" The EOB line was matched to this bill line by AI-assisted reading of the descriptions and remarks; "
+                "confirm which EOB line answers it.") if by_model else ""
         result.flags.append(Flag(
             check="provider_liability", kind="error", bill_lines=(line.line_no,), amount_cents=extra,
-            rule=RULE, confidence=confidence_for(RULE),
+            rule=RULE, confidence="medium" if by_model else confidence_for(RULE),
             evidence=(
                 Evidence(source="bill", values={"line_no": line.line_no, "patient_balance_cents": line.patient_balance_cents}),
                 Evidence(source="eob", values={
@@ -49,7 +55,7 @@ def run(ctx: CheckContext) -> CheckResult:
                 }),
             ),
             message=(f"Possible error to verify: line {line.line_no} ({line.code}) bills the patient "
-                     f"{dollars(line.patient_balance_cents)}, but the EOB says the patient owes {dollars(owed)}."),
+                     f"{dollars(line.patient_balance_cents)}, but the EOB says the patient owes {dollars(owed)}.{note}"),
             ask=(f"Ask the billing office why line {line.line_no} shows {dollars(extra)} more than the insurer's "
                  "patient responsibility, and whether the contractual adjustment was applied."),
         ))

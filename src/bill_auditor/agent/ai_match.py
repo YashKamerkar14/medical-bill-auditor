@@ -7,6 +7,11 @@ candidates (same code and date), still free, and its billed amount must equal
 the bill line's charge. A proposal that fails, or "cannot tell", leaves the line
 ambiguous, so its patient balance stays "cannot check". Personal details are
 redacted before the prompt is built.
+
+Milestone 6 guardrails: a bill line whose description, or any of whose candidate
+EOB remarks, looks like an instruction to an AI is never sent (it stays
+ambiguous); the redacted prompt passes the pre-send PII gate or nothing is sent;
+an answer that does not match the schema is regenerated once.
 """
 
 import json
@@ -14,6 +19,8 @@ import json
 from pydantic import BaseModel, Field
 
 from bill_auditor.checks.matching import LineMatch
+from bill_auditor.guardrails.injection import suspicious
+from bill_auditor.guardrails.pii import UnsafePayload, assert_safe_to_send
 from bill_auditor.parsing.redaction import redact
 from bill_auditor.parsing.schemas import Bill, Eob
 
@@ -49,6 +56,10 @@ def _candidates(bill: Bill, eob: Eob, matches: list[LineMatch]) -> dict[int, lis
 def model_match(bill: Bill, eob: Eob, matches: list[LineMatch], llm) -> list[LineMatch]:
     """Matches with ambiguous lines resolved where the model's proposal passes validation."""
     candidates = _candidates(bill, eob, matches)
+    remarks = {e.line_no: e.remark for e in eob.lines}
+    descriptions = {l.line_no: l.description for l in bill.lines}
+    candidates = {b: c for b, c in candidates.items()
+                  if not suspicious(descriptions[b]) and not any(suspicious(remarks[e]) for e in c)}
     if not candidates:
         return matches
     view = redact(bill, eob)
@@ -59,7 +70,14 @@ def model_match(bill: Bill, eob: Eob, matches: list[LineMatch], llm) -> list[Lin
         "eob_lines": [{k: l[k] for k in ("line_no", "code", "date_of_service", "modifiers", "units", "billed_cents",
                                          "remark")} for l in view.eob["lines"] if l["line_no"] in wanted_eob],
     }
-    answer = llm.structured(MATCH_SYSTEM, "Pair these lines.\n\n" + json.dumps(prompt, indent=1), MatchAnswer).parsed
+    user = "Pair these lines.\n\n" + json.dumps(prompt, indent=1)
+    try:
+        assert_safe_to_send(user, view.mapping, what="ai_match")
+        answer = llm.structured(MATCH_SYSTEM, user, MatchAnswer).parsed
+        if answer is None:  # did not match the schema: regenerate once
+            answer = llm.structured(MATCH_SYSTEM, user, MatchAnswer).parsed
+    except UnsafePayload:
+        return matches  # nothing was sent; the lines stay ambiguous ("cannot check")
     if answer is None:
         return matches
 

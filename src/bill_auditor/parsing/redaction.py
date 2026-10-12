@@ -9,6 +9,14 @@ this machine; `restore` puts the values back into text written by a model.
 
 Codes, amounts, dates of service and the (synthetic) provider NPI are kept:
 the checks need them and they identify no patient.
+
+Milestone 6 (red team) widened what counts as the patient's value in free
+text: the date of birth written out ("March 3, 1961") or with other
+separators, the first name on its own (matched only capitalised, so "Will" or
+"May" in ordinary text survive), and the member and account ids with any
+spacing or dashes ("mbr 123 456 789"). Generic personal data that is not a bill
+field (SSN, phone, email, card number) is scrubbed by pattern
+(bill_auditor.guardrails.pii).
 """
 
 import re
@@ -24,15 +32,24 @@ class Redacted:
     mapping: dict[str, str] = field(default_factory=dict)  # placeholder -> original value
 
 
+CASE_SENSITIVE = {"[PATIENT_FIRST_NAME]"}           # common words too ("Will", "May"): only capitalised
+SPACING_TOLERANT = {"[ACCOUNT_NUMBER]", "[MEMBER_ID]", "[EOB_MEMBER_ID]"}  # "MBR 123-456-789" is still the id
+
+
 def _secrets(bill: Bill, eob: Eob | None) -> dict[str, str]:
     """Placeholder -> value, most specific first so longer values are replaced before their parts."""
     p = bill.patient
+    dob = p.date_of_birth
     secrets = {
         "[PATIENT_NAME]": p.name,
         "[PATIENT_ADDRESS]": p.address,
         "[ACCOUNT_NUMBER]": p.account_number,
-        "[DATE_OF_BIRTH]": p.date_of_birth.isoformat(),
-        "[DATE_OF_BIRTH_US]": p.date_of_birth.strftime("%m/%d/%Y"),
+        "[DATE_OF_BIRTH]": dob.isoformat(),
+        "[DATE_OF_BIRTH_US]": dob.strftime("%m/%d/%Y"),
+        "[DATE_OF_BIRTH_US_SHORT]": f"{dob.month}/{dob.day}/{dob.year}",
+        "[DATE_OF_BIRTH_DASHES]": dob.strftime("%m-%d-%Y"),
+        "[DATE_OF_BIRTH_WORDS]": f"{dob.strftime('%B')} {dob.day}, {dob.year}",
+        "[DATE_OF_BIRTH_WORDS_DAY_FIRST]": f"{dob.day} {dob.strftime('%B')} {dob.year}",
         "[PROVIDER_NAME]": bill.provider.name,
     }
     if p.member_id:
@@ -44,27 +61,41 @@ def _secrets(bill: Bill, eob: Eob | None) -> dict[str, str]:
     last_name = p.name.split()[-1]
     if len(last_name) >= 3:  # surname alone, e.g. "Mr. Smith" in a note
         secrets["[PATIENT_LAST_NAME]"] = last_name
+    street = p.address.split(",")[0].strip()
+    if len(street) >= 6 and street != p.address:  # the street line alone, e.g. "mailed to 12 Oak Street"
+        secrets["[PATIENT_STREET]"] = street
+    first_name = p.name.split()[0]
+    if len(first_name) >= 3 and len(p.name.split()) > 1:  # first name alone, e.g. "spoke with Maria"
+        secrets["[PATIENT_FIRST_NAME]"] = first_name
     return dict(sorted(secrets.items(), key=lambda item: -len(item[1])))
 
 
-def _whole(value: str) -> re.Pattern:
+def _whole(value: str, placeholder: str = "") -> re.Pattern:
     """`value` as a whole word, optionally followed by "s" (plural / possessive).
 
     "Tate" matches "Mr. Tate", "Tate's" and "the Tates'", but not "statement":
-    a name inside a longer word is not that name.
+    a name inside a longer word is not that name. Ids also match with spaces or
+    dashes between their characters; the first name matches only as written.
     """
-    return re.compile(rf"(?<![A-Za-z0-9]){re.escape(value)}s?(?![A-Za-z0-9])", re.IGNORECASE)
+    if placeholder in SPACING_TOLERANT:
+        body = r"[\s.-]*".join(re.escape(ch) for ch in value if ch.isalnum())
+    else:
+        body = re.escape(value)
+    flags = 0 if placeholder in CASE_SENSITIVE else re.IGNORECASE
+    return re.compile(rf"(?<![A-Za-z0-9]){body}s?(?![A-Za-z0-9])", flags)
 
 
-def contains_value(text: str, value: str) -> bool:
+def contains_value(text: str, value: str, placeholder: str = "") -> bool:
     """True if `value` appears in `text` as a whole word (used by the pre-send safety check)."""
-    return bool(_whole(value).search(text))
+    return bool(_whole(value, placeholder).search(text))
 
 
 def _scrub(text: str, secrets: dict[str, str]) -> str:
+    from bill_auditor.guardrails.pii import scrub_generic  # here to avoid an import cycle
+
     for placeholder, value in secrets.items():
-        text = _whole(value).sub(placeholder, text)
-    return text
+        text = _whole(value, placeholder).sub(placeholder, text)
+    return scrub_generic(text)
 
 
 def redact(bill: Bill, eob: Eob | None = None) -> Redacted:

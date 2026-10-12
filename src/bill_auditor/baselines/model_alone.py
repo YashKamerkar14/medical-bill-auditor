@@ -27,7 +27,8 @@ from pydantic import BaseModel, Field
 
 from bill_auditor.evaluation.schemas import Case, PredictedFlag
 from bill_auditor.llm.gemini import GeminiClient, ModelCallFailed, RateLimited
-from bill_auditor.parsing.redaction import contains_value, redact
+from bill_auditor.guardrails.pii import UnsafePayload, assert_safe_to_send  # noqa: F401 (UnsafePayload re-exported)
+from bill_auditor.parsing.redaction import redact
 
 SYSTEM_PROMPT = """\
 You audit itemized US professional medical bills (CMS-1500 style) for possible billing errors, \
@@ -89,18 +90,12 @@ class BaselineAnswer(BaseModel):
     flags: list[BaselineFlag]
 
 
-class UnsafePayload(RuntimeError):
-    """A personal value survived redaction; nothing was sent."""
-
-
 def build_user_message(case: Case) -> str:
     if not case.bill.synthetic or (case.eob is not None and not case.eob.synthetic):
         raise UnsafePayload(f"{case.case_id}: only synthetic bills may be sent to a model")
     view = redact(case.bill, case.eob)
     payload = json.dumps({"BILL": view.bill, "EOB": view.eob}, indent=1)
-    for placeholder, value in view.mapping.items():
-        if contains_value(payload, value):  # whole words only: a name inside "statement_date" is not a leak
-            raise UnsafePayload(f"{case.case_id}: {placeholder} survived redaction; nothing was sent")
+    assert_safe_to_send(payload, view.mapping, what=case.case_id)
     return f"Audit this bill.\n\n{payload}"
 
 

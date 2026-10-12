@@ -438,6 +438,48 @@ def cmd_mcp_parity(args) -> None:
     print(f"saved {out.relative_to(PROJECT_ROOT)}")
 
 
+def cmd_red_team(args) -> None:
+    """Milestone 6: the adversarial suite through the full system with the real model (free tier, cached)."""
+    from bill_auditor.evaluation.adversarial import build_adversarial_cases
+    from bill_auditor.evaluation.red_team import run_red_team
+    from bill_auditor.ingest.index_manual import open_chroma
+    from bill_auditor.llm.guarded import GuardedLLM
+    from bill_auditor.retrieval.embeddings import FastEmbedEmbedder
+
+    paths = load_paths()
+    model = model_name()
+    llm = GuardedLLM(GeminiClient(model), cache_dir=paths.eval_dir / "llm_cache" / model,
+                     usage_dir=paths.data_dir / "llm_usage", max_calls=args.max_calls, daily_cap=args.daily_cap,
+                     min_interval_s=args.min_interval)
+    cases = build_adversarial_cases()
+    with _lookups(paths, args.via, manual=True) as lookups:
+        chroma, embedder = (None, None) if lookups else (open_chroma(paths.chroma_dir), FastEmbedEmbedder(paths.models_dir))
+        result = run_red_team(cases, paths.sqlite_path, llm, chroma, embedder, lookups, baseline=not args.no_baseline)
+    print(f"model calls: {llm.calls} new, {llm.cache_hits} from cache; {llm.used_today()} used today")
+    if result["stopped"]:
+        print(f"STOPPED ({len(result['rows'])}/{len(cases)} cases done): {result['stopped']}; run again later (cached).")
+        return
+    rows = result["rows"]
+    for group in ("matching", "text", "pii", "malformed"):
+        part = [r for r in rows if r["group"] == group]
+        print(f"{group:<10} {sum(r['passed'] for r in part)}/{len(part)} passed")
+    for r in rows:
+        if not r["passed"]:
+            print(f"  FAIL {r['case_id']} ({r['attack']}): {r['problems']}")
+    audited = [r for r in rows if "model_alone" in r]
+    if audited:
+        print(f"model alone on the same attacks: fully correct {sum(r['model_alone']['fully_correct'] for r in audited)}"
+              f"/{len(audited)}; non-neutral wording in {sum(bool(r['model_alone']['wording']) for r in audited)}")
+    passed = sum(r["passed"] for r in rows)
+    print(f"ADVERSARIAL SUITE: {passed}/{len(rows)} passed")
+    summary = {"model": model, "lookups": args.via, "cases": len(rows), "passed": passed,
+               "model_calls": {"new": llm.calls, "cached": llm.cache_hits}, "rows": rows}
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    out = RESULTS_DIR / f"m6_red_team_{stamp}.json"
+    out.write_text(json.dumps(summary, indent=1, default=str), encoding="utf-8")
+    print(f"saved {out.relative_to(PROJECT_ROOT)}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(required=True)
@@ -490,6 +532,13 @@ def main() -> None:
     parity_p = sub.add_parser("mcp-parity", help="Milestone 5: byte-identical tool outputs and identical scores via MCP")
     parity_p.add_argument("--skip-model", action="store_true", help="only the lookups and rules-only parts")
     parity_p.set_defaults(func=cmd_mcp_parity)
+    red_p = sub.add_parser("red-team", help="Milestone 6: the adversarial suite through the full system (free tier)")
+    red_p.add_argument("--max-calls", type=int, default=120)
+    red_p.add_argument("--daily-cap", type=int, default=450)
+    red_p.add_argument("--min-interval", type=float, default=5.0)
+    red_p.add_argument("--via", choices=["direct", "mcp"], default="mcp", help="how lookups are made")
+    red_p.add_argument("--no-baseline", action="store_true", help="skip the model-alone contrast")
+    red_p.set_defaults(func=cmd_red_team)
     args = parser.parse_args()
     args.func(args)
 

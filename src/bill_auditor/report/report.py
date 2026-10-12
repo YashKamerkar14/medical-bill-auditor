@@ -16,7 +16,7 @@ from bill_auditor.agent.explain import Explanation
 from bill_auditor.checks.context import dollars
 from bill_auditor.checks.models import CannotCheck, Flag
 from bill_auditor.guardrails.verify import DroppedFlag
-from bill_auditor.guardrails.wording import BANNED_WORDS
+from bill_auditor.guardrails.wording import wording_problem
 
 NOTICE = ("Research prototype. Not legal or financial advice. These are possible errors to verify: "
           "confirm every item with the billing office and your insurer before acting on it.")
@@ -38,6 +38,7 @@ class Report(BaseModel):
     cannot_check: list[CannotCheck] = []
     dropped: list[DroppedFlag] = []
     problems: list[str] = []          # why a bill was rejected or a run stopped
+    input_warnings: list[str] = []    # instruction-like text found on the bill or EOB (treated as data)
     steps_used: int = 0
     explanations: dict[str, Explanation] = {}  # flag_id -> manual-grounded explanation (Milestone 3)
 
@@ -47,17 +48,24 @@ class Report(BaseModel):
 
 
 def build_report(bill_id, status, model, releases, flags, cannot, dropped, problems, steps_used,
-                 explanations: dict[str, Explanation] | None = None) -> Report:
+                 explanations: dict[str, Explanation] | None = None, input_warnings: list[str] | None = None) -> Report:
     errors = sorted((f for f in flags if f.kind == "error"),
                     key=lambda f: (_CONFIDENCE_ORDER[f.confidence], -f.amount_cents, f.bill_lines))
     benchmarks = sorted((f for f in flags if f.kind == "benchmark"), key=lambda f: -f.amount_cents)
+    # Model-written explanations were checked in the explain step; this is the last line of defence.
+    checked = {}
+    for flag_id, e in (explanations or {}).items():
+        if e.status == "explained" and wording_problem(e.text):
+            e = e.model_copy(update={"status": "unverified", "text": "", "quotes": [], "quotes_verified": 0,
+                                     "note": f"Explanation dropped: wording not neutral ({wording_problem(e.text)})"})
+        checked[flag_id] = e
     report = Report(bill_id=bill_id, status=status, model=model, releases=releases, errors=errors,
                     benchmarks=benchmarks, cannot_check=cannot, dropped=dropped, problems=problems,
-                    steps_used=steps_used, explanations=explanations or {})
-    text = " ".join([f.message + " " + f.ask for f in errors + benchmarks] + [c.reason for c in cannot]
-                    + [e.text for e in report.explanations.values()])
-    if BANNED_WORDS.search(text):
-        raise WordingViolation(f"Report wording must stay neutral; found {BANNED_WORDS.search(text).group(0)!r}")
+                    steps_used=steps_used, explanations=checked, input_warnings=input_warnings or [])
+    # Deterministic text is written by our code: a violation here is a bug, so fail loudly.
+    text = " ".join([f.message + " " + f.ask for f in errors + benchmarks] + [c.reason for c in cannot])
+    if wording_problem(text):
+        raise WordingViolation(f"Report wording must stay neutral; found {wording_problem(text)}")
     return report
 
 
@@ -93,6 +101,8 @@ def render_markdown(report: Report) -> str:
             out += [f"     > “{q.text.strip()}” ({q.passage_id})" for q in explanation.quotes]
         elif explanation is not None:
             out.append("   - No verified manual passage for this finding.")
+    if report.input_warnings:
+        out += ["", "## Input warnings", ""] + [f"- {w}" for w in report.input_warnings]
     out += ["", f"## Price benchmarks, not errors ({len(report.benchmarks)})", ""]
     if not report.benchmarks:
         out.append("None.")
