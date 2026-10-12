@@ -17,6 +17,7 @@ from bill_auditor.baselines.react_agent import (
     run_agent,
 )
 from bill_auditor.evaluation.hard_cases import build_hard_cases
+from bill_auditor.lookups import DirectLookups
 from bill_auditor.llm.gemini import StructuredResult
 
 CASES = {c.case_id: c for c in build_hard_cases()}
@@ -69,7 +70,7 @@ def test_agent_uses_tools_then_answers(audit_db_path):
             call("get_unit_limit", code="Z1040", date_of_service="2026-11-10")]),
         final({"check": "unbundling", "kind": "error", "target": "line", "bill_lines": [1, 2], "amount_cents": 50000}),
     ])
-    graph = build_react_graph(llm, Toolbox(audit_db_path, None, None))
+    graph = build_react_graph(llm, Toolbox(DirectLookups(audit_db_path)))
     out = run_agent(graph, build_user_message(case))
     assert out["final"].flags[0].bill_lines == [1, 2] and out["turns"] == 2 and not out["exhausted"]
     assert [tool for tool, _ in out["tool_log"]] == ["check_code_pair", "get_unit_limit"]
@@ -83,26 +84,26 @@ def test_tool_errors_come_back_as_text(audit_db_path):
                                               ToolCall(tool="calculate", arguments_json="not json")]),
         final(),
     ])
-    out = run_agent(build_react_graph(llm, Toolbox(audit_db_path, None, None)), "BILL")
+    out = run_agent(build_react_graph(llm, Toolbox(DirectLookups(audit_db_path))), "BILL")
     assert out["final"] is not None
     assert "error: KeyError" in llm.prompts[1] and "not a JSON object" in llm.prompts[1]
 
 
 def test_running_out_of_turns_makes_the_case_invalid(audit_db_path):
     llm = ScriptedLLM([])  # never answers
-    out = run_agent(build_react_graph(llm, Toolbox(audit_db_path, None, None)), "BILL")
+    out = run_agent(build_react_graph(llm, Toolbox(DirectLookups(audit_db_path))), "BILL")
     assert out["final"] is None and out["exhausted"] and out["turns"] == MAX_TURNS
     assert len(llm.prompts) == MAX_TURNS
 
 
 def test_invalid_step_is_noted_and_counts_as_a_turn(audit_db_path):
     llm = ScriptedLLM(["invalid", final()])
-    out = run_agent(build_react_graph(llm, Toolbox(audit_db_path, None, None)), "BILL")
+    out = run_agent(build_react_graph(llm, Toolbox(DirectLookups(audit_db_path))), "BILL")
     assert out["turns"] == 2 and "did not match the schema" in llm.prompts[1]
 
 
 def test_bill_is_redacted_before_the_agent_sees_it(audit_db_path):
     case = CASES["hard-m01"]
     llm = ScriptedLLM([final()])
-    run_agent(build_react_graph(llm, Toolbox(audit_db_path, None, None)), build_user_message(case))
+    run_agent(build_react_graph(llm, Toolbox(DirectLookups(audit_db_path))), build_user_message(case))
     assert case.bill.patient.name not in llm.prompts[0] and "[PATIENT_NAME]" in llm.prompts[0]

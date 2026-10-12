@@ -22,9 +22,7 @@ import operator
 import time
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as ToolTimeout
-from contextlib import closing
 from datetime import date
-from pathlib import Path
 from typing import Literal
 
 from langgraph.errors import GraphRecursionError
@@ -33,12 +31,6 @@ from pydantic import BaseModel, Field
 from typing_extensions import TypedDict
 
 from bill_auditor.baselines.model_alone import SYSTEM_PROMPT, BaselineFlag
-from bill_auditor.db import connect
-from bill_auditor.retrieval.hybrid import hybrid_search
-from bill_auditor.tables.charges import get_charge_benchmark
-from bill_auditor.tables.code_pairs import check_code_pair
-from bill_auditor.tables.fee_schedule import get_fee_schedule_amount
-from bill_auditor.tables.unit_limits import get_unit_limit
 
 MAX_TURNS = 8
 MAX_CALLS_PER_TURN = 6
@@ -115,36 +107,39 @@ def calculate(expression: str) -> float:
 
 
 class Toolbox:
-    """The agent's read-only tools. Each call opens its own connection (calls run in parallel threads)."""
+    """The agent's read-only tools, on a `Lookups` (direct or over MCP); `calculate` runs locally.
 
-    def __init__(self, db_path: Path, chroma, embedder):
-        self.db_path, self.chroma, self.embedder = db_path, chroma, embedder
+    The observation text is kept exactly as in Milestone 4, so prompts, and therefore cached answers, are the same.
+    """
+
+    def __init__(self, lookups):
+        self.lookups = lookups
 
     def run(self, tool: str, args: dict):
-        with closing(connect(self.db_path)) as conn:
-            dos = lambda key="date_of_service": date.fromisoformat(args[key])  # noqa: E731
-            if tool == "get_fee_schedule_amount":
-                return get_fee_schedule_amount(conn, args["code"], args.get("modifier"), args["locality_id"],
-                                               args["setting"], dos()).model_dump(mode="json", exclude_none=True)
-            if tool == "check_code_pair":
-                return check_code_pair(conn, args["code_a"], args["code_b"], dos(), args.get("modifiers_a") or [],
-                                       args.get("modifiers_b") or []).model_dump(mode="json", exclude_none=True)
-            if tool == "get_unit_limit":
-                return get_unit_limit(conn, args["code"], dos()).model_dump(mode="json", exclude_none=True)
-            if tool == "get_charge_benchmark":
-                return get_charge_benchmark(conn, args["code"], args["setting"], dos()).model_dump(mode="json", exclude_none=True)
-            if tool == "search_rules":
-                found = hybrid_search(conn, self.chroma, self.embedder, str(args["query"]), k=3)
-                if found.insufficient:
-                    return {"status": "insufficient_evidence"}
-                return [{"passage_id": h.chunk_id, "section_id": h.section_id, "title": h.section_title,
-                         "text": h.text[:500]} for h in found.hits]
-            if tool == "get_manual_section":
-                row = conn.execute("SELECT title, text FROM manual_sections WHERE section_id = ?",
-                                   (str(args["section_id"]),)).fetchone()
-                return {"error": "no such section"} if row is None else {"title": row["title"], "text": row["text"][:1500]}
-            if tool == "calculate":
-                return {"result": calculate(str(args["expression"]))}
+        dos = lambda key="date_of_service": date.fromisoformat(args[key])  # noqa: E731
+        if tool == "get_fee_schedule_amount":
+            return self.lookups.get_fee_schedule_amount(args["code"], args.get("modifier"), args["locality_id"],
+                                                        args["setting"], dos()).model_dump(mode="json", exclude_none=True)
+        if tool == "check_code_pair":
+            return self.lookups.check_code_pair(args["code_a"], args["code_b"], dos(), args.get("modifiers_a") or [],
+                                                args.get("modifiers_b") or []).model_dump(mode="json", exclude_none=True)
+        if tool == "get_unit_limit":
+            return self.lookups.get_unit_limit(args["code"], dos()).model_dump(mode="json", exclude_none=True)
+        if tool == "get_charge_benchmark":
+            return self.lookups.get_charge_benchmark(args["code"], args["setting"], dos()).model_dump(
+                mode="json", exclude_none=True)
+        if tool == "search_rules":
+            found = self.lookups.search_rules(str(args["query"]), "hybrid", 3)
+            if found.insufficient:
+                return {"status": "insufficient_evidence"}
+            return [{"passage_id": h.chunk_id, "section_id": h.section_id, "title": h.section_title,
+                     "text": h.text[:500]} for h in found.hits]
+        if tool == "get_manual_section":
+            section = self.lookups.get_manual_section(str(args["section_id"]))
+            return {"error": "no such section"} if section.status != "found" else {"title": section.title,
+                                                                                  "text": section.text[:1500]}
+        if tool == "calculate":
+            return {"result": calculate(str(args["expression"]))}
         raise ValueError(f"unknown tool {tool!r}")
 
 

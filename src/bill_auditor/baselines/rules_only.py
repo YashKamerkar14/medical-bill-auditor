@@ -26,8 +26,8 @@ class RulesOnlyRun:
         return all(s <= STEP_BUDGET for s in self.steps.values()) and "stopped" not in self.statuses.values()
 
 
-def run_rules_only(cases: list[Case], db_path: Path, trace_dir: Path | None = None) -> RulesOnlyRun:
-    graph = build_graph(db_path)
+def run_rules_only(cases: list[Case], db_path: Path, trace_dir: Path | None = None, lookups=None) -> RulesOnlyRun:
+    graph = build_graph(db_path, lookups=lookups)
     result = RulesOnlyRun()
     for case in cases:
         tracer = Tracer(trace_dir / f"{case.case_id}.jsonl" if trace_dir else None)

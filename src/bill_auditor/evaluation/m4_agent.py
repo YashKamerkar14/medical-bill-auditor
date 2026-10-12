@@ -51,9 +51,10 @@ def lookups_made(tool_log: list) -> set[tuple]:
     return made
 
 
-def run_react(cases: list[Case], out_dir: Path, llm, db_path: Path, chroma, embedder, limit: int | None = None) -> dict:
+def run_react(cases: list[Case], out_dir: Path, llm, db_path: Path, lookups, limit: int | None = None) -> dict:
+    """`lookups` serve the agent's tools (direct or over MCP); `db_path` is read directly to verify its quotes."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    graph = build_react_graph(llm, Toolbox(db_path, chroma, embedder))
+    graph = build_react_graph(llm, Toolbox(lookups))
     done = skipped = 0
     stopped = None
     for case in cases:

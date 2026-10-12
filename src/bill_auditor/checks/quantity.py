@@ -8,10 +8,10 @@ x unit price. A code with no published limit is "cannot check", never "pass".
 
 from collections import defaultdict
 
-from bill_auditor.checks.context import CheckContext, CheckResult, dollars
+from bill_auditor.checks.context import CheckContext, CheckResult, dollars, lookup_unavailable
 from bill_auditor.checks.models import CannotCheck, Evidence, Flag
 from bill_auditor.guardrails.confidence import confidence_for
-from bill_auditor.tables.unit_limits import get_unit_limit
+from bill_auditor.lookups import LookupUnavailable
 
 
 def _flag(lines, limit, units) -> Flag:
@@ -42,7 +42,11 @@ def run(ctx: CheckContext) -> CheckResult:
         return result
     per_day = defaultdict(list)
     for line in ctx.lines():
-        limit = get_unit_limit(ctx.conn, line.code, line.date_of_service)
+        try:
+            limit = ctx.lookups.get_unit_limit(line.code, line.date_of_service)
+        except LookupUnavailable as error:
+            result.cannot.append(lookup_unavailable("quantity", [line.line_no], error))
+            continue
         if limit.status != "limit":
             result.cannot.append(CannotCheck(check="quantity", target="line", bill_lines=(line.line_no,),
                                              reason=limit.message))

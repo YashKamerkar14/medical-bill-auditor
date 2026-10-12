@@ -51,8 +51,9 @@ class FullRun:
         return all(s <= STEP_BUDGET for s in self.steps.values())
 
 
-def run_full_system(cases: list[Case], db_path: Path, llm, chroma, embedder, trace_dir: Path | None = None) -> FullRun:
-    graph = build_graph(db_path, llm=llm, chroma=chroma, embedder=embedder)
+def run_full_system(cases: list[Case], db_path: Path, llm, chroma, embedder, trace_dir: Path | None = None,
+                    lookups=None) -> FullRun:
+    graph = build_graph(db_path, llm=llm, chroma=chroma, embedder=embedder, lookups=lookups)
     result = FullRun()
     start = time.perf_counter()
     with connect(db_path) as conn:

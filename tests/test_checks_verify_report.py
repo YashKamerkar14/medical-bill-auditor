@@ -12,6 +12,7 @@ from bill_auditor.evaluation.hard_cases import build_hard_cases, hard, line
 from bill_auditor.guardrails.verify import CHECKS, verify
 from bill_auditor.parsing.intake import intake, unknown_lines
 from bill_auditor.parsing.schemas import Bill
+from bill_auditor.lookups import DirectLookups
 from bill_auditor.report.report import NOTICE, WordingViolation, build_report, render_markdown
 
 CASES = {c.case_id: c for c in build_hard_cases()}
@@ -21,7 +22,8 @@ def context(conn, case) -> CheckContext:
     result = intake(conn, case.bill, case.eob)
     matches = (match_lines(result.bill, result.eob) if result.eob else
                [LineMatch(bill_line=l.line_no, eob_line=None, method="unmatched") for l in result.bill.lines])
-    return CheckContext(conn=conn, bill=result.bill, eob=result.eob, matches=matches,
+    db_file = conn.execute("PRAGMA database_list").fetchone()["file"]
+    return CheckContext(conn=conn, lookups=DirectLookups(db_file), bill=result.bill, eob=result.eob, matches=matches,
                         skip_lines=frozenset(unknown_lines(result)), table_checks=result.table_checks)
 
 

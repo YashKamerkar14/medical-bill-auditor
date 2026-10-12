@@ -1,0 +1,82 @@
+{
+ "lookups": "MCP over stdio vs direct",
+ "tool_fingerprint": "109244ab30ba35333e52b85dac0d33e73d2b7d341e1386de5963e1ffadc361a3",
+ "byte_parity": {
+  "check lookups on every bill": {
+   "calls": 4224,
+   "identical": 4224,
+   "mismatches": [],
+   "errors": []
+  },
+  "lookup oracles": {
+   "calls": 12,
+   "identical": 12,
+   "mismatches": [],
+   "errors": []
+  },
+  "retrieval queries x 3 modes (k=5)": {
+   "calls": 210,
+   "identical": 209,
+   "mismatches": [
+    {
+     "call": [
+      "search_rules",
+      [
+       "Am I protected by the No Surprises Act from a surprise bill after emergency care?",
+       "hybrid",
+       "5"
+      ]
+     ],
+     "direct": "{\"hits\":[{\"chunk_id\":\"I.V#11\",\"mode\":\"hybrid\",\"page_end\":\"I-33\",\"page_start\":\"I-32\",\"rank\":1,\"release_label\":\"NCCI Policy Manual 2026 (rev. 2026-01-01)\",\"score\":0.032787,\"section_id\":\"I.V\",\"section_title\":\"Medically Unlikely Edits (MUEs)\",\"text\":\"e. The MUE value of a code may be \u201c0\u201d if the code is ",
+     "mcp": "{\"hits\":[{\"chunk_id\":\"I.V#11\",\"mode\":\"hybrid\",\"page_end\":\"I-33\",\"page_start\":\"I-32\",\"rank\":1,\"release_label\":\"NCCI Policy Manual 2026 (rev. 2026-01-01)\",\"score\":0.032787,\"section_id\":\"I.V\",\"section_title\":\"Medically Unlikely Edits (MUEs)\",\"text\":\"e. The MUE value of a code may be \u201c0\u201d if the code is "
+    }
+   ],
+   "errors": []
+  },
+  "retrieval queries, hybrid k=3 (agent)": {
+   "calls": 70,
+   "identical": 70,
+   "mismatches": [],
+   "errors": []
+  },
+  "manual sections (+2 unknown ids)": {
+   "calls": 48,
+   "identical": 48,
+   "mismatches": [],
+   "errors": []
+  }
+ },
+ "resources": {
+  "sections": "46/46",
+  "chapters": "2/2"
+ },
+ "rules_only": {
+  "cases": 348,
+  "identical_outputs": 348,
+  "identical_scores": true
+ },
+ "full_system": {
+  "cases": 348,
+  "stopped_direct": null,
+  "stopped_mcp": null,
+  "identical_outputs": 348,
+  "identical_explanations": true,
+  "new_model_calls": 0,
+  "cached_calls_mcp": 319
+ },
+ "react_agent": {
+  "cases": 115,
+  "direct": {
+   "stopped": null,
+   "new_model_calls": 0,
+   "uncached_prompts_replayed_as_invalid": 1,
+   "records_identical_to_m4": 115
+  },
+  "mcp": {
+   "stopped": null,
+   "new_model_calls": 0,
+   "uncached_prompts_replayed_as_invalid": 1,
+   "records_identical_to_m4": 115
+  }
+ }
+}

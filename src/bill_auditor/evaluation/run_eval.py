@@ -11,11 +11,12 @@ sample of the set. Scoring covers the cases answered so far and says so.
 """
 
 import argparse
-from contextlib import closing
+from contextlib import closing, contextmanager
 import hashlib
 import json
 import os
 from datetime import datetime, timezone
+from pathlib import Path
 
 from bill_auditor.agent.graph import STEP_BUDGET
 from bill_auditor.baselines.model_alone import PROMPT_VERSION, load_outputs, run
@@ -27,6 +28,7 @@ from bill_auditor.evaluation.generator import read_cases
 from bill_auditor.evaluation.metrics import format_report, summarise
 from bill_auditor.evaluation.schemas import Case
 from bill_auditor.llm.gemini import DEFAULT_MODEL, GeminiClient
+from bill_auditor.lookups import DirectLookups
 
 HARD_CASES = PROJECT_ROOT / "eval" / "hard_cases" / "cases.jsonl"
 RESULTS_DIR = PROJECT_ROOT / "eval" / "results"
@@ -63,6 +65,20 @@ def cmd_run(args) -> None:
         print(f"stopped: {report.stopped_reason}")
 
 
+@contextmanager
+def _lookups(paths, via: str, manual: bool):
+    """The evidence lookups: None (each runner builds DirectLookups), or McpLookups through our stdio server."""
+    if via == "mcp":
+        from bill_auditor.mcp_client import McpLookups, stdio_server
+
+        server = stdio_server(paths.sqlite_path, paths.chroma_dir, paths.models_dir) if manual else stdio_server(paths.sqlite_path)
+        with McpLookups(server) as lookups:
+            print(f"lookups over MCP (stdio), tool fingerprint {lookups.fingerprint[:12]} verified")
+            yield lookups
+    else:
+        yield None
+
+
 def _file_hash(path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -95,7 +111,7 @@ def _save_scores(paths, system: str, title: str, split: str, cases: list[Case], 
     }
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    milestone = {"rules_only": "m2", "full_system": "m3"}.get(system, "m1")
+    milestone = "m5" if extra.get("lookups") == "mcp" else {"rules_only": "m2", "full_system": "m3"}.get(system, "m1")
     out = RESULTS_DIR / f"{milestone}_{system}_{split}_{stamp}.json"
     out.write_text(json.dumps(result, indent=1), encoding="utf-8")
     print(f"saved {out.relative_to(PROJECT_ROOT)} ({len(answered)}/{len(cases)} cases answered)")
@@ -119,7 +135,8 @@ def cmd_score_rules(args) -> None:
     paths = load_paths()
     cases = load_cases(paths, args.split)
     trace_dir = paths.data_dir / "traces" / f"rules_only_{args.split}" if args.trace else None
-    run_result = run_rules_only(cases, paths.sqlite_path, trace_dir)
+    with _lookups(paths, args.via, manual=False) as lookups:
+        run_result = run_rules_only(cases, paths.sqlite_path, trace_dir, lookups=lookups)
     steps = list(run_result.steps.values())
     budget = {
         "step_budget": STEP_BUDGET,
@@ -134,7 +151,7 @@ def cmd_score_rules(args) -> None:
           f"(max used {budget['max_steps_used']}); verify dropped {budget['flags_dropped_by_verify']} flag(s)",
           end="\n\n")
     _save_scores(paths, "rules_only", "Rules only (no model)", args.split, cases, cases, run_result.outputs,
-                 {"model": "none", "step_budget_check": budget})
+                 {"model": "none", "lookups": args.via, "step_budget_check": budget})
 
 
 def cmd_score_full(args) -> None:
@@ -150,8 +167,9 @@ def cmd_score_full(args) -> None:
                      usage_dir=paths.data_dir / "llm_usage", max_calls=args.max_calls, daily_cap=args.daily_cap,
                      min_interval_s=args.min_interval)
     trace_dir = paths.data_dir / "traces" / f"full_system_{args.split}" if args.trace else None
-    run_result = run_full_system(cases, paths.sqlite_path, llm, open_chroma(paths.chroma_dir),
-                                 FastEmbedEmbedder(paths.models_dir), trace_dir)
+    with _lookups(paths, args.via, manual=True) as lookups:
+        chroma, embedder = (None, None) if lookups else (open_chroma(paths.chroma_dir), FastEmbedEmbedder(paths.models_dir))
+        run_result = run_full_system(cases, paths.sqlite_path, llm, chroma, embedder, trace_dir, lookups=lookups)
     print(f"model calls: {llm.calls} new, {llm.cache_hits} from cache, {llm.busy_retries} busy retries; "
           f"{llm.used_today()} used today; {run_result.seconds:.0f}s")
     if run_result.stopped:
@@ -165,7 +183,7 @@ def cmd_score_full(args) -> None:
           f"final evidence validity {explain['final_evidence_validity']['rate']} | "
           f"section match {explain['section_match_rate']['rate']}", end="\n\n")
     _save_scores(paths, "full_system", f"Full system ({model})", args.split, cases, cases, run_result.outputs,
-                 {"model": model, "explanations": explain,
+                 {"model": model, "lookups": args.via, "explanations": explain,
                   "step_budget_check": {"step_budget": STEP_BUDGET, "max_steps_used": max(steps),
                                         "all_within_budget": run_result.within_budget},
                   "model_calls": {"new": llm.calls, "cached": llm.cache_hits, "busy_retries": llm.busy_retries,
@@ -227,9 +245,10 @@ def cmd_run_react(args) -> None:
     paths = load_paths()
     llm, client = _m4_llm(paths, args)
     cases = _sample_cases(paths, args.part)
-    out_dir = paths.eval_dir / "runs" / "react" / llm.model
-    report = run_react(cases, out_dir, llm, paths.sqlite_path, open_chroma(paths.chroma_dir),
-                       FastEmbedEmbedder(paths.models_dir), limit=args.limit)
+    out_dir = paths.eval_dir / "runs" / ("react" if args.via == "direct" else "react_mcp") / llm.model
+    with _lookups(paths, args.via, manual=True) as lookups:
+        lookups = lookups or DirectLookups(paths.sqlite_path, open_chroma(paths.chroma_dir), FastEmbedEmbedder(paths.models_dir))
+        report = run_react(cases, out_dir, llm, paths.sqlite_path, lookups, limit=args.limit)
     spent = client.overflow.spent()
     print(f"{args.part}: {report['done']} run, {report['skipped']} already done; model calls {llm.calls} new / "
           f"{llm.cache_hits} cached; providers {client.calls}; OpenRouter spend so far ${spent:.4f} of ${args.cap_usd:.2f}")
@@ -324,6 +343,101 @@ def cmd_score_abstention(args) -> None:
     print(f"saved {out.relative_to(PROJECT_ROOT)}")
 
 
+def cmd_mcp_parity(args) -> None:
+    """Milestone 5 done-when: byte-identical tool outputs, and identical scores through MCP (no new model calls)."""
+    from bill_auditor.evaluation.m4_agent import load_react, run_react
+    from bill_auditor.evaluation.mcp_parity import (RecordingLookups, ReplayLLM, compare, compare_resources,
+                                                     oracle_calls, search_calls)
+    from bill_auditor.ingest.index_manual import open_chroma
+    from bill_auditor.llm.guarded import GuardedLLM
+    from bill_auditor.mcp_client import McpLookups, canonical_json, stdio_server
+    from bill_auditor.retrieval.embeddings import FastEmbedEmbedder
+
+    paths = load_paths()
+    chroma, embedder = open_chroma(paths.chroma_dir), FastEmbedEmbedder(paths.models_dir)
+    direct = DirectLookups(paths.sqlite_path, chroma, embedder)
+    cases = load_cases(paths, "all")
+    queries_dir = PROJECT_ROOT / "eval" / "retrieval_queries"
+    queries = [q["query"] for q in json.loads((queries_dir / "queries.json").read_text(encoding="utf-8"))["queries"]]
+    queries += [q["query"] for q in json.loads((queries_dir / "abstention_queries.json").read_text(encoding="utf-8"))["unanswerable"]]
+    oracle_file = paths.eval_dir / "oracles" / "lookups.json"
+    oracles = json.loads(oracle_file.read_text(encoding="utf-8"))["oracles"] if oracle_file.exists() else []
+
+    def flags_json(outputs):
+        return {cid: canonical_json([f.model_dump(mode="json") for f in flags] if flags is not None else None)
+                for cid, flags in outputs.items()}
+
+    result = {"lookups": "MCP over stdio vs direct"}
+    with McpLookups(stdio_server(paths.sqlite_path, paths.chroma_dir, paths.models_dir)) as mcp:
+        result["tool_fingerprint"] = mcp.fingerprint
+        print(f"server verified (tool fingerprint {mcp.fingerprint[:12]})")
+
+        recorder = RecordingLookups(direct)
+        rules_direct = run_rules_only(cases, paths.sqlite_path, lookups=recorder)
+        sections = [s["section_id"] for s in direct.section_index()]
+        groups = {
+            "check lookups on every bill": recorder.calls,
+            "lookup oracles": oracle_calls(oracles),
+            "retrieval queries x 3 modes (k=5)": search_calls(queries),
+            "retrieval queries, hybrid k=3 (agent)": search_calls(queries, ("hybrid",), (3,)),
+            "manual sections (+2 unknown ids)": [("get_manual_section", (sid,)) for sid in sections + ["I.ZZ", "../x"]],
+        }
+        result["byte_parity"] = {name: compare(direct, mcp, calls) for name, calls in groups.items()}
+        for name, r in result["byte_parity"].items():
+            print(f"byte-identical, {name}: {r['identical']}/{r['calls']} ({len(r['errors'])} errors)")
+        result["resources"] = compare_resources(direct, mcp)
+        print(f"resources identical: sections {result['resources']['sections']}, chapters {result['resources']['chapters']}")
+
+        rules_mcp = run_rules_only(cases, paths.sqlite_path, lookups=mcp)
+        a, b = flags_json(rules_direct.outputs), flags_json(rules_mcp.outputs)
+        result["rules_only"] = {"cases": len(cases), "identical_outputs": sum(a[c] == b[c] for c in a),
+                                "identical_scores": canonical_json(summarise(cases, rules_direct.outputs))
+                                == canonical_json(summarise(cases, rules_mcp.outputs))}
+        print(f"rules only: {result['rules_only']}")
+
+        if not args.skip_model:
+            model = model_name()
+
+            def zero_call_llm():  # cache only: a changed prompt stops the run instead of calling the model
+                return GuardedLLM(GeminiClient(model), cache_dir=paths.eval_dir / "llm_cache" / model,
+                                  usage_dir=paths.data_dir / "llm_usage", max_calls=0, daily_cap=0, min_interval_s=0)
+
+            llm_d, llm_m = zero_call_llm(), zero_call_llm()
+            full_direct = run_full_system(cases, paths.sqlite_path, llm_d, chroma, embedder)
+            full_mcp = run_full_system(cases, paths.sqlite_path, llm_m, None, None, lookups=mcp)
+            a, b = flags_json(full_direct.outputs), flags_json(full_mcp.outputs)
+            result["full_system"] = {
+                "cases": len(cases), "stopped_direct": full_direct.stopped, "stopped_mcp": full_mcp.stopped,
+                "identical_outputs": sum(a.get(c) == b.get(c) for c in a),
+                "identical_explanations": canonical_json(full_direct.explanations) == canonical_json(full_mcp.explanations),
+                "new_model_calls": llm_d.calls + llm_m.calls, "cached_calls_mcp": llm_m.cache_hits}
+            print(f"full system: {result['full_system']}")
+
+            import tempfile
+
+            sample = _sample_cases(paths, "dev_scored") + _sample_cases(paths, "heldout_scored")
+            saved = load_react(paths.eval_dir / "runs" / "react" / model)
+            keys = ("flags", "valid", "turns", "tool_calls", "quotes")
+            result["react_agent"] = {"cases": len(sample)}
+            for name, lookups in (("direct", direct), ("mcp", mcp)):
+                replay_llm = ReplayLLM(zero_call_llm())
+                with tempfile.TemporaryDirectory() as tmp:
+                    report = run_react(sample, Path(tmp), replay_llm, paths.sqlite_path, lookups)
+                    replayed = load_react(Path(tmp))
+                result["react_agent"][name] = {
+                    "stopped": report["stopped"], "new_model_calls": replay_llm.llm.calls,
+                    "uncached_prompts_replayed_as_invalid": replay_llm.uncached,
+                    "records_identical_to_m4": sum(c.case_id in replayed and all(
+                        canonical_json(saved[c.case_id][k]) == canonical_json(replayed[c.case_id][k]) for k in keys)
+                        for c in sample)}
+            print(f"ReAct agent: {result['react_agent']}")
+
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    out = RESULTS_DIR / f"m5_mcp_parity_{stamp}.json"
+    out.write_text(json.dumps(result, indent=1, default=str), encoding="utf-8")
+    print(f"saved {out.relative_to(PROJECT_ROOT)}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(required=True)
@@ -338,6 +452,7 @@ def main() -> None:
     rules_p = sub.add_parser("score-rules", help="run the rules-only graph on all cases and score it")
     rules_p.add_argument("--split", choices=["dev", "heldout", "all"], default="dev")
     rules_p.add_argument("--trace", action="store_true", help="write a local trace file per case")
+    rules_p.add_argument("--via", choices=["direct", "mcp"], default="direct", help="how the checks make lookups")
     rules_p.set_defaults(func=cmd_score_rules)
     full_p = sub.add_parser("score-full", help="run the full system (free-tier model, cached) and score it")
     full_p.add_argument("--split", choices=["dev", "heldout", "all"], default="dev")
@@ -346,6 +461,7 @@ def main() -> None:
                         help="cap on model calls per day; Google's free tier for this model is 500/day (seen 2026-10-07)")
     full_p.add_argument("--min-interval", type=float, default=5.0, help="seconds between model calls")
     full_p.add_argument("--trace", action="store_true")
+    full_p.add_argument("--via", choices=["direct", "mcp"], default="direct", help="how lookups are made")
     full_p.set_defaults(func=cmd_score_full)
     retrieval_p = sub.add_parser("score-retrieval", help="Milestone 4: compare search modes on the labelled queries")
     retrieval_p.set_defaults(func=cmd_score_retrieval)
@@ -356,6 +472,7 @@ def main() -> None:
     react_p.add_argument("--daily-cap", type=int, default=2000, help="calls/day across providers (Google's own limit triggers the overflow)")
     react_p.add_argument("--min-interval", type=float, default=5.0)
     react_p.add_argument("--cap-usd", type=float, default=1.00, help="OpenRouter spend cap for all Milestone 4 runs")
+    react_p.add_argument("--via", choices=["direct", "mcp"], default="direct", help="how the agent's tools make lookups")
     react_p.set_defaults(func=cmd_run_react)
     m4_p = sub.add_parser("score-m4", help="Milestone 4: score A, B, C, D on the same sample cases")
     m4_p.add_argument("--part", choices=["dev_scored", "heldout_scored"], required=True)
@@ -370,6 +487,9 @@ def main() -> None:
     abst_p.add_argument("--min-interval", type=float, default=5.0)
     abst_p.add_argument("--cap-usd", type=float, default=1.00)
     abst_p.set_defaults(func=cmd_score_abstention)
+    parity_p = sub.add_parser("mcp-parity", help="Milestone 5: byte-identical tool outputs and identical scores via MCP")
+    parity_p.add_argument("--skip-model", action="store_true", help="only the lookups and rules-only parts")
+    parity_p.set_defaults(func=cmd_mcp_parity)
     args = parser.parse_args()
     args.func(args)
 

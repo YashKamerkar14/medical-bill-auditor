@@ -13,10 +13,10 @@ not every insurer's rule.
 
 from itertools import combinations
 
-from bill_auditor.checks.context import CheckContext, CheckResult, dollars
+from bill_auditor.checks.context import CheckContext, CheckResult, dollars, lookup_unavailable
 from bill_auditor.checks.models import Evidence, Flag
 from bill_auditor.guardrails.confidence import confidence_for
-from bill_auditor.tables.code_pairs import check_code_pair
+from bill_auditor.lookups import LookupUnavailable
 
 
 def _insurer_paid_both(ctx: CheckContext, a: int, b: int) -> bool:
@@ -34,7 +34,11 @@ def run(ctx: CheckContext) -> CheckResult:
     for a, b in combinations(ctx.lines(), 2):
         if a.date_of_service != b.date_of_service or a.code == b.code:
             continue
-        pair = check_code_pair(ctx.conn, a.code, b.code, a.date_of_service, a.modifiers, b.modifiers)
+        try:
+            pair = ctx.lookups.check_code_pair(a.code, b.code, a.date_of_service, a.modifiers, b.modifiers)
+        except LookupUnavailable as error:
+            result.cannot.append(lookup_unavailable("unbundling", [a.line_no, b.line_no], error))
+            continue
         if pair.status != "edit":
             continue
         bypass = pair.bypass_modifiers_on_column1 + pair.bypass_modifiers_on_column2

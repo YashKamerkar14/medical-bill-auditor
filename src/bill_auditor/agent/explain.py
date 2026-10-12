@@ -29,7 +29,7 @@ from bill_auditor.checks.models import Flag
 from bill_auditor.db import connect
 from bill_auditor.guardrails.quotes import verify_quote
 from bill_auditor.guardrails.wording import BANNED_WORDS
-from bill_auditor.retrieval.hybrid import hybrid_search
+from bill_auditor.lookups import LookupUnavailable
 from bill_auditor.retrieval.models import SearchHit
 
 EXPLAINED_CHECKS = ("unbundling", "quantity", "duplicate")
@@ -133,14 +133,16 @@ class ExplainState(TypedDict, total=False):
     explanation: Explanation
 
 
-def build_explain_graph(db_path: Path, chroma, embedder, llm):
+def build_explain_graph(db_path: Path, lookups, llm):
     def make_query(state: ExplainState) -> dict:
         query = initial_query(state["flag"])
         return {"query": query, "queries": [query], "rewrites": 0, "writes": 0, "quotes_proposed": 0}
 
     def retrieve(state: ExplainState) -> dict:
-        with closing(connect(db_path)) as conn:
-            found = hybrid_search(conn, chroma, embedder, state["query"])
+        try:
+            found = lookups.search_rules(state["query"], "hybrid", 5)
+        except LookupUnavailable:
+            return {"hits": []}  # nothing to grade: the flag ends as "insufficient evidence"
         return {"hits": found.hits}
 
     def grade(state: ExplainState) -> dict:

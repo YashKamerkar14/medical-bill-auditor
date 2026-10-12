@@ -108,6 +108,9 @@ Run from the repository root. In a VS Code terminal `UV_PROJECT_ENVIRONMENT` is 
 | Milestone 4: run the ReAct agent on the locked sample (resumable) | `uv run python -m bill_auditor.evaluation.run_eval run-react --part dev_scored` |
 | Milestone 4: score A, B, C, D on the same sample cases | `uv run python -m bill_auditor.evaluation.run_eval score-m4 --part heldout_scored` |
 | Milestone 4: grader abstention (about 46 model calls) | `uv run python -m bill_auditor.evaluation.run_eval score-abstention` |
+| Milestone 5: start our MCP server over stdio (for an MCP client such as the Inspector) | `uv run python -m bill_auditor.mcp_server --db C:\dev\bill-auditor-data\bill_auditor.sqlite --chroma C:\dev\bill-auditor-data\chroma --models C:\dev\bill-auditor-data\models` |
+| Milestone 5: any scorer through MCP instead of direct lookups | add `--via mcp` to `score-rules`, `score-full` or `run-react` |
+| Milestone 5: parity proof (byte-identical lookups, identical scores, zero new model calls) | `uv run python -m bill_auditor.evaluation.run_eval mcp-parity` |
 
 Milestone 4 commands use Gemini free tier first and, only after Google's daily quota is gone, the same model through OpenRouter (`OPENROUTER_API_KEY`), hard-capped at $1.00 in total (`--cap-usd`, spend recorded in `DATA_DIR/llm_usage/openrouter_spend_m4.json`). This is the owner's one exception to free-tier-only.
 

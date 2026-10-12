@@ -7,13 +7,13 @@ negotiation, with the CMS average billed charge as context. Charging more than
 Medicare is normal and is never called an error.
 """
 
-from bill_auditor.checks.context import CheckContext, CheckResult, dollars
+from bill_auditor.checks.context import CheckContext, CheckResult, dollars, lookup_unavailable
 from bill_auditor.checks.models import CannotCheck, Evidence, Flag
 from bill_auditor.checks.settings import PRICE_BENCHMARK_RATIO, PRICE_CHECK_SELF_PAY_ONLY
 from bill_auditor.guardrails.confidence import confidence_for
 from bill_auditor.parsing.schemas import PLACE_OF_SERVICE_SETTING
-from bill_auditor.tables.charges import get_charge_benchmark
-from bill_auditor.tables.fee_schedule import PRICING_MODIFIERS, get_fee_schedule_amount
+from bill_auditor.lookups import LookupUnavailable
+from bill_auditor.tables.fee_schedule import PRICING_MODIFIERS
 
 RULE = "price.ratio"
 
@@ -26,7 +26,11 @@ def run(ctx: CheckContext) -> CheckResult:
     for line in ctx.lines():
         setting = PLACE_OF_SERVICE_SETTING[line.place_of_service]
         modifier = next((m for m in line.modifiers if m in PRICING_MODIFIERS), None)
-        fee = get_fee_schedule_amount(ctx.conn, line.code, modifier, locality, setting, line.date_of_service)
+        try:
+            fee = ctx.lookups.get_fee_schedule_amount(line.code, modifier, locality, setting, line.date_of_service)
+        except LookupUnavailable as error:
+            result.cannot.append(lookup_unavailable("price_benchmark", [line.line_no], error))
+            continue
         if fee.status != "found" or not fee.amount_cents:
             result.cannot.append(CannotCheck(check="price_benchmark", target="line", bill_lines=(line.line_no,),
                                              reason=fee.message if fee.status != "found" else "Medicare amount is $0"))
@@ -34,12 +38,15 @@ def run(ctx: CheckContext) -> CheckResult:
         if line.unit_price_cents < PRICE_BENCHMARK_RATIO * fee.amount_cents:
             continue
         medicare_total = fee.amount_cents * line.units
-        typical = get_charge_benchmark(ctx.conn, line.code, setting, line.date_of_service)
+        try:
+            typical = ctx.lookups.get_charge_benchmark(line.code, setting, line.date_of_service)
+        except LookupUnavailable:
+            typical = None  # price context only: the benchmark flag stands without it
         evidence = [Evidence(source="table_row", table="pfs_amounts", release_label=fee.release_label, values={
             "code": fee.code, "pricing_modifier": fee.pricing_modifier, "locality_id": locality, "setting": setting,
             "amount_cents": fee.amount_cents, "source_part": fee.source_part})]
         context = ""
-        if typical.status == "found":
+        if typical is not None and typical.status == "found":
             evidence.append(Evidence(source="table_row", table="charge_benchmarks", release_label=typical.release_label,
                                      values={"code": typical.code, "geography": typical.geography, "setting": setting,
                                              "avg_submitted_cents": typical.avg_submitted_cents,

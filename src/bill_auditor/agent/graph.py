@@ -44,6 +44,7 @@ from bill_auditor.guardrails.quotes import verify_quote
 from bill_auditor.guardrails.verify import verify
 from bill_auditor.llm.gemini import ModelCallFailed, RateLimited
 from bill_auditor.llm.guarded import BudgetExhausted
+from bill_auditor.lookups import DirectLookups, Lookups
 from bill_auditor.parsing.intake import intake, unknown_lines
 from bill_auditor.report.report import Report, build_report
 
@@ -63,15 +64,21 @@ RECURSION_LIMIT = 12                      # supersteps; the full graph needs at 
 MODEL_ERRORS = (BudgetExhausted, RateLimited, ModelCallFailed)
 
 
-def _context(conn, state: AuditState) -> CheckContext:
+def _context(conn, lookups, state: AuditState) -> CheckContext:
     result = state["intake"]
-    return CheckContext(conn=conn, bill=result.bill, eob=result.eob, matches=state["matches"],
+    return CheckContext(conn=conn, lookups=lookups, bill=result.bill, eob=result.eob, matches=state["matches"],
                         skip_lines=frozenset(unknown_lines(result)), table_checks=result.table_checks)
 
 
-def build_graph(db_path: Path, llm=None, chroma=None, embedder=None):
-    """Rules only when `llm` is None; otherwise the full system (needs `chroma` and `embedder` for the manual)."""
-    explain_graph = build_explain_graph(db_path, chroma, embedder, llm) if llm is not None else None
+def build_graph(db_path: Path, llm=None, chroma=None, embedder=None, lookups: Lookups | None = None):
+    """Rules only when `llm` is None; otherwise the full system.
+
+    Evidence lookups go through `lookups`: by default direct (`chroma` and `embedder` are needed for the manual
+    search in the full system), or `McpLookups` to make them over MCP. Intake and verify always read the database
+    at `db_path` directly.
+    """
+    lookups = lookups or DirectLookups(db_path, chroma, embedder)
+    explain_graph = build_explain_graph(db_path, lookups, llm) if llm is not None else None
     model_label = RULES_ONLY_MODEL if llm is None else f"{llm.model} (matching of ambiguous lines and explanations only)"
 
     def open_db():
@@ -110,13 +117,13 @@ def build_graph(db_path: Path, llm=None, chroma=None, embedder=None):
     def check_node(check):
         def node(state: AuditState) -> dict:
             with open_db() as conn:
-                found = check(_context(conn, state))
+                found = check(_context(conn, lookups, state))
             return {"candidate_flags": found.flags, "cannot_check": found.cannot, "steps_used": 1}
         return node
 
     def verify_node(state: AuditState) -> dict:
         with open_db() as conn:
-            kept, dropped = verify(_context(conn, state), state.get("candidate_flags", []))
+            kept, dropped = verify(_context(conn, lookups, state), state.get("candidate_flags", []))
         return {"verified_flags": kept, "dropped_flags": dropped, "steps_used": 1}
 
     def route_to_explain(state: AuditState):

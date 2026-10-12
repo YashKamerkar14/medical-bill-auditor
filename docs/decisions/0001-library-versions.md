@@ -14,7 +14,8 @@ LangGraph and MCP change quickly, and evaluation results are only comparable if 
 | --- | --- | --- |
 | langgraph | 1.2.14 | Orchestration (`StateGraph`, `Send`, recursion limit) |
 | langchain-core | 1.6.7 | Shared message/tool types used by LangGraph |
-| langchain[mcp] | 1.4.3 | MCP client (`langchain.mcp`, beta), used from Milestone 5 |
+| ~~langchain[mcp]~~ | ~~1.4.3~~ | Removed in Milestone 5 (ADR 0010): the MCP client is a thin client on `mcp` |
+| anyio | 4.15.1 | Runs the async MCP client from the synchronous graph (Milestone 5, ADR 0010) |
 | mcp | 2.3.0 | Official MCP Python SDK; our server uses `MCPServer` |
 | chromadb | 1.5.9 | Local persistent vector store |
 | fastembed | 0.8.1 | Local ONNX embeddings (no API key), runs `BAAI/bge-small-en-v1.5` |
@@ -41,6 +42,8 @@ MCP 2.0 was released on 2026-07-28 and has breaking changes: `mcp.server.fastmcp
 **Chosen: `mcp` 2.3.0 for our server and `langchain.mcp` as the client.** The server is the part we write most code against, so it should be on the current major version, and the client must speak the same version. The beta risk is contained because the client is used in one place (the graph's tool loader). The pinned version cannot change under us, and the Milestone 5 test (byte-identical tool outputs through MCP and direct calls) catches any behaviour change on upgrade.
 
 Fallback if `langchain.mcp` proves unworkable at Milestone 5: a thin client on `mcp.ClientSession` that wraps each tool as a LangChain `StructuredTool`. This choice is re-checked at the start of Milestone 5.
+
+**Update (Milestone 5, ADR 0010):** re-checked; the thin client on the official SDK was chosen and `langchain[mcp]` removed, since nothing in the code is a LangChain tool-calling agent.
 
 ## Windows-specific settings
 

@@ -5,12 +5,14 @@ from dataclasses import dataclass, field
 
 from bill_auditor.checks.matching import LineMatch
 from bill_auditor.checks.models import CannotCheck, Flag
+from bill_auditor.lookups import Lookups
 from bill_auditor.parsing.schemas import Bill, Eob
 
 
 @dataclass(frozen=True)
 class CheckContext:
-    conn: sqlite3.Connection
+    conn: sqlite3.Connection     # direct, read by the verify step only
+    lookups: Lookups             # every evidence lookup the checks make (direct or over MCP)
     bill: Bill
     eob: Eob | None
     matches: list[LineMatch]
@@ -25,6 +27,11 @@ class CheckContext:
 class CheckResult:
     flags: list[Flag] = field(default_factory=list)
     cannot: list[CannotCheck] = field(default_factory=list)
+
+
+def lookup_unavailable(check: str, lines, error: Exception) -> CannotCheck:
+    """A lookup failed or timed out: report "cannot check", never guess."""
+    return CannotCheck(check=check, target="line", bill_lines=tuple(lines), reason=f"cannot check: lookup unavailable ({error})")
 
 
 def dollars(cents: int) -> str:

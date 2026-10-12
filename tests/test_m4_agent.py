@@ -5,6 +5,7 @@ import json
 from bill_auditor.baselines.react_agent import AgentAnswer, ReActStep, ToolCall
 from bill_auditor.evaluation.hard_cases import build_hard_cases
 from bill_auditor.evaluation.m4_agent import PROMPT_VERSION, fully_correct, load_react, lookups_made, required_lookups, run_react
+from bill_auditor.lookups import DirectLookups
 from bill_auditor.llm.gemini import RateLimited, StructuredResult
 
 CASES = {c.case_id: c for c in build_hard_cases()}
@@ -38,13 +39,13 @@ def test_required_lookups_for_a_pair_case():
 
 def test_run_saves_resumes_and_stops_on_quota(tmp_path, audit_db_path):
     cases = [CASES["hard-t02"], CASES["hard-m01"]]
-    report = run_react(cases, tmp_path, FakeLLM(fail_on_call=3), audit_db_path, None, None)
+    report = run_react(cases, tmp_path, FakeLLM(fail_on_call=3), audit_db_path, DirectLookups(audit_db_path))
     assert report["done"] == 1 and report["stopped"].startswith("hard-m01")
     assert set(load_react(tmp_path)) == {"hard-t02"}  # nothing partial saved for the failed case
     record = json.loads((tmp_path / "hard-t02.json").read_text())
     assert record["prompt_version"] == PROMPT_VERSION and record["turns"] == 2 and record["required_lookups_made"] == 1
 
-    report = run_react(cases, tmp_path, FakeLLM(), audit_db_path, None, None)
+    report = run_react(cases, tmp_path, FakeLLM(), audit_db_path, DirectLookups(audit_db_path))
     assert report == {"done": 1, "skipped": 1, "stopped": None}
 
 
